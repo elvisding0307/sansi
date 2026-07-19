@@ -16,11 +16,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-# ============== GitHub OAuth Configuration ==============
-GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", "YOUR_GITHUB_CLIENT_ID")
-GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "YOUR_GITHUB_CLIENT_SECRET")
-GITHUB_REDIRECT_URI = "http://localhost:8000/api/auth/github/callback"
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -52,7 +47,7 @@ from .database import crud
 from .database.models import ReportRequest
 from .auth import (
     get_current_user, require_auth, create_user_session, delete_user_session,
-    authenticate_user, register_user, get_or_create_github_user, 
+    authenticate_user, register_user,
     change_user_password, init_default_admin
 )
 from .middleware import RequestLoggerMiddleware
@@ -198,110 +193,12 @@ async def change_password_route(req: ChangePasswordRequest, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    # GitHub users cannot change password
-    if user.get("provider") == "github" or user["email"].startswith("github:"):
-        raise HTTPException(status_code=400, detail="GitHub users cannot change password")
-    
     success = change_user_password(user["id"], req.currentPassword, req.newPassword)
     
     if not success:
         raise HTTPException(status_code=401, detail="Current password is incorrect")
     
     return {"success": True, "message": "Password changed successfully"}
-
-# ============== GitHub OAuth Routes ==============
-
-@app.get("/api/auth/github")
-async def github_login():
-    """Redirect to GitHub OAuth authorization page"""
-    if GITHUB_CLIENT_ID == "YOUR_GITHUB_CLIENT_ID":
-        raise HTTPException(status_code=500, detail="GitHub OAuth not configured. Please set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET.")
-    
-    github_auth_url = (
-        f"https://github.com/login/oauth/authorize"
-        f"?client_id={GITHUB_CLIENT_ID}"
-        f"&redirect_uri={GITHUB_REDIRECT_URI}"
-        f"&scope=user:email"
-    )
-    return RedirectResponse(url=github_auth_url)
-
-@app.get("/api/auth/github/callback")
-async def github_callback(code: str, response: Response):
-    """Handle GitHub OAuth callback"""
-    if not code:
-        raise HTTPException(status_code=400, detail="No code provided")
-    
-    # Exchange code for access token
-    async with httpx.AsyncClient() as client:
-        token_response = await client.post(
-            "https://github.com/login/oauth/access_token",
-            data={
-                "client_id": GITHUB_CLIENT_ID,
-                "client_secret": GITHUB_CLIENT_SECRET,
-                "code": code,
-                "redirect_uri": GITHUB_REDIRECT_URI
-            },
-            headers={"Accept": "application/json"}
-        )
-        token_data = token_response.json()
-        
-        if "error" in token_data:
-            raise HTTPException(status_code=400, detail=token_data.get("error_description", "Failed to get access token"))
-        
-        access_token = token_data.get("access_token")
-        
-        # Get user info from GitHub
-        user_response = await client.get(
-            "https://api.github.com/user",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/json"
-            }
-        )
-        github_user = user_response.json()
-        
-        # Get user email (might be private)
-        email_response = await client.get(
-            "https://api.github.com/user/emails",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/json"
-            }
-        )
-        emails = email_response.json()
-        
-        # Find primary email
-        primary_email = None
-        for email_obj in emails:
-            if email_obj.get("primary"):
-                primary_email = email_obj.get("email")
-                break
-        
-        if not primary_email:
-            primary_email = github_user.get("email") or f"{github_user['login']}@github.local"
-        
-        # Create or update user in database
-        user = get_or_create_github_user(
-            email=primary_email,
-            name=github_user.get("name") or github_user.get("login"),
-            avatar_url=github_user.get("avatar_url"),
-            github_id=github_user.get("id")
-        )
-        
-        # Create session
-        session_id = create_user_session(user_id=user.id)
-        
-        # Create redirect response with cookie
-        redirect_response = RedirectResponse(url="/", status_code=302)
-        redirect_response.set_cookie(
-            key="session_id",
-            value=session_id,
-            httponly=True,
-            max_age=7 * 24 * 60 * 60,
-            samesite="lax"
-        )
-        
-        return redirect_response
 
 # ============== Page Routes ==============
 

@@ -127,34 +127,6 @@ def register_user(
         db.close()
 
 
-def get_or_create_github_user(
-    email: str,
-    name: str,
-    avatar_url: Optional[str] = None,
-    github_id: Optional[int] = None
-) -> User:
-    """Get or create a GitHub OAuth user"""
-    db = SessionLocal()
-    try:
-        # Use github: prefix for OAuth users
-        github_email = f"github:{email}"
-        
-        user = crud.get_user_by_email(db, github_email)
-        if not user:
-            user = crud.create_user(
-                db=db,
-                email=github_email,
-                name=name,
-                provider="github",
-                avatar_url=avatar_url,
-                github_id=github_id
-            )
-        
-        return user
-    finally:
-        db.close()
-
-
 def change_user_password(user_id: int, current_password: str, new_password: str) -> bool:
     """Change user password"""
     db = SessionLocal()
