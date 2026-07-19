@@ -82,6 +82,7 @@ def main():
 
     # Load configuration and API keys
     openai_base_url = None
+    openai_model = None
     adanos_api_key = os.getenv("ADANOS_API_KEY")
     adanos_base_url = os.getenv("ADANOS_BASE_URL", "https://api.adanos.org")
     try:
@@ -90,26 +91,40 @@ def main():
         adanos_api_key = config.get("API_KEYS", "adanos_api_key", fallback=adanos_api_key)
         adanos_base_url = config.get("API_KEYS", "adanos_base_url", fallback=adanos_base_url)
         if args.generate_text_sections:
-            openai_api_key = get_api_key(config, section="API_KEYS", key="openai_api_key")
-            # Try to get base_url for proxy services (like SiliconFlow)
-            try:
-                openai_base_url = get_api_key(config, section="API_KEYS", key="openai_base_url")
-                print(f"Using OpenAI base URL: {openai_base_url}")
-            except:
-                pass  # base_url is optional
-            # Try to get model name for proxy services
-            try:
-                openai_model = get_api_key(config, section="API_KEYS", key="openai_model")
-                print(f"Using model: {openai_model}")
-            except:
-                openai_model = None  # model is optional
+            # Support both deepseek_api_key and openai_api_key (backward compatibility)
+            openai_api_key = config.get("API_KEYS", "deepseek_api_key", fallback=None)
+            if not openai_api_key:
+                openai_api_key = get_api_key(config, section="API_KEYS", key="openai_api_key")
+            # Try to get base_url (deepseek first, then openai)
+            openai_base_url = config.get("API_KEYS", "deepseek_base_url", fallback=None)
+            if not openai_base_url:
+                try:
+                    openai_base_url = get_api_key(config, section="API_KEYS", key="openai_base_url")
+                except:
+                    pass
+            print(f"Using API base URL: {openai_base_url}")
+            # Try to get model name
+            openai_model = config.get("API_KEYS", "deepseek_model", fallback=None)
+            if not openai_model:
+                try:
+                    openai_model = get_api_key(config, section="API_KEYS", key="openai_model")
+                except:
+                    openai_model = None
+            print(f"Using model: {openai_model}")
+            # Set env vars for openai-agents SDK (it reads OPENAI_API_KEY and OPENAI_BASE_URL internally)
+            os.environ['OPENAI_API_KEY'] = openai_api_key
+            if openai_base_url:
+                os.environ['OPENAI_BASE_URL'] = openai_base_url
+            if openai_model:
+                os.environ['OPENAI_MODEL_NAME'] = openai_model
     except Exception as e:
         print(f"Error loading configuration: {e}")
         print("Please ensure config.ini exists with valid API keys:")
         print("[API_KEYS]")
         print("fmp_api_key = YOUR_FMP_API_KEY")
-        print("openai_api_key = YOUR_OPENAI_API_KEY")
-        print("openai_base_url = https://api.xxx.com/v1  # optional, for proxy services")
+        print("deepseek_api_key = YOUR_DEEPSEEK_API_KEY")
+        print("deepseek_base_url = https://api.deepseek.com/v1")
+        print("deepseek_model = deepseek-chat")
         return
 
     print(f"Starting FMP API-based financial analysis for {args.company_name} ({args.company_ticker})")

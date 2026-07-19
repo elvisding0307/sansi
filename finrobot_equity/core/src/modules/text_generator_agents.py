@@ -3,6 +3,7 @@
 
 import pandas as pd
 from typing import Dict, Optional
+import os
 from openai import OpenAI
 
 from modules.retail_sentiment_client import format_retail_sentiment_for_prompt
@@ -100,22 +101,19 @@ def generate_text_section(data: Dict, prompt_type: str, api_key: str, company_na
         print(f"⚠️ Warning: No API key provided. Using fallback text for '{prompt_type}'.")
         return _get_fallback_text(prompt_type, company_name)
     
-    # Determine model to use
-    default_model = "gpt-4o-mini"
-    if model:
-        default_model = model
-    
-    # Create OpenAI client
+    # Determine model and base_url
+    default_model = model or os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+    default_base_url = base_url or os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+
+    # Create OpenAI-compatible client (works with DeepSeek)
     try:
-        client_kwargs = {"api_key": api_key}
-        if base_url:
-            client_kwargs["base_url"] = base_url
-            print(f"📡 Using API base URL: {base_url}")
-        
+        client_kwargs = {"api_key": api_key, "base_url": default_base_url}
+        print(f"📡 Using API base URL: {default_base_url}")
+
         client = OpenAI(**client_kwargs)
         print(f"🤖 Using model: {default_model}")
     except Exception as e:
-        print(f"⚠️ Warning: Could not create OpenAI client: {e}")
+        print(f"⚠️ Warning: Could not create API client: {e}")
         return _get_fallback_text(prompt_type, company_name)
     
     # Get system prompt

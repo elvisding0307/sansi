@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TextGenerationConfig:
     """文本生成配置"""
-    model: str = "gpt-4"
+    model: str = "deepseek-chat"
     temperature: float = 0.7
     max_tokens: int = 2000
     language: str = "en"
@@ -57,23 +57,20 @@ Support all conclusions with data references."""
             api_key: OpenAI API密钥
             base_url: API基础URL（可选）
         """
-        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
-        self.base_url = base_url
+        self.api_key = api_key or os.getenv('DEEPSEEK_API_KEY') or os.getenv('OPENAI_API_KEY')
+        self.base_url = base_url or os.getenv('DEEPSEEK_BASE_URL', 'https://api.deepseek.com/v1')
         self.config = TextGenerationConfig()
         self.client = None
         self._init_client()
-    
+
     def _init_client(self):
-        """初始化OpenAI客户端"""
+        """Initialize API client (OpenAI-compatible)"""
         try:
             from openai import OpenAI
-            if self.base_url:
-                self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
-            else:
-                self.client = OpenAI(api_key=self.api_key)
-            logger.info("✅ OpenAI client initialized")
+            self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+            logger.info(f"✅ API client initialized (base_url={self.base_url})")
         except Exception as e:
-            logger.warning(f"⚠️ Could not initialize OpenAI client: {e}")
+            logger.warning(f"⚠️ Could not initialize API client: {e}")
             self.client = None
 
     def _generate_with_llm(self, system_prompt: str, user_prompt: str) -> str:

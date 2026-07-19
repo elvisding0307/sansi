@@ -31,9 +31,7 @@ PID_FILE="${SCRIPT_DIR}/.app.pid"
 LOG_DIR="${SCRIPT_DIR}/finrobot_equity/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/app.log"
-#REQUIREMENTS_CORE="${SCRIPT_DIR}/requirements.txt"
 REQUIREMENTS_EQUITY="${SCRIPT_DIR}/requirements-equity.txt"
-REQUIREMENTS_WEB="${SCRIPT_DIR}/web_requirements.txt"
 
 # Web app configuration
 WEB_HOST="${WEB_HOST:-127.0.0.1}"
@@ -177,22 +175,10 @@ install_deps() {
     print_info "Upgrading pip, setuptools, and wheel..."
     pip install --upgrade pip setuptools wheel 2>&1 | tail -5
     
-    # # Install core dependencies
-    # if [ -f "$REQUIREMENTS_CORE" ]; then
-    #     print_info "Installing core dependencies from $REQUIREMENTS_CORE..."
-    #     pip install -r "$REQUIREMENTS_CORE" 2>&1 | tail -5
-    # fi
-    
     # Install equity research dependencies
     if [ -f "$REQUIREMENTS_EQUITY" ]; then
-        print_info "Installing equity research dependencies from $REQUIREMENTS_EQUITY..."
+        print_info "Installing dependencies from $REQUIREMENTS_EQUITY..."
         pip install -r "$REQUIREMENTS_EQUITY" 2>&1 | tail -5
-    fi
-    
-    # Install web application dependencies
-    if [ -f "$REQUIREMENTS_WEB" ]; then
-        print_info "Installing web application dependencies from $REQUIREMENTS_WEB..."
-        pip install -r "$REQUIREMENTS_WEB" 2>&1 | tail -5
     fi
     
     # Note: finrobot_equity is a local module, no need to install separately

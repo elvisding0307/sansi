@@ -385,10 +385,20 @@ def main():
         fmp_api_key = get_api_key(config, "API_KEYS", "fmp_api_key")
         if args.enable_text_regeneration:
             try:
-                openai_api_key = get_api_key(config, "API_KEYS", "openai_api_key")
-                print("✅ OpenAI API key loaded for text regeneration")
+                # Support both deepseek_api_key and openai_api_key
+                openai_api_key = config.get("API_KEYS", "deepseek_api_key", fallback=None)
+                if not openai_api_key:
+                    openai_api_key = get_api_key(config, "API_KEYS", "openai_api_key")
+                # Also set env vars for openai-agents SDK and text_generator fallback
+                os.environ['OPENAI_API_KEY'] = openai_api_key
+                deepseek_base_url = config.get("API_KEYS", "deepseek_base_url", fallback="https://api.deepseek.com/v1")
+                deepseek_model = config.get("API_KEYS", "deepseek_model", fallback="deepseek-chat")
+                os.environ.setdefault('OPENAI_BASE_URL', deepseek_base_url)
+                os.environ.setdefault('DEEPSEEK_BASE_URL', deepseek_base_url)
+                os.environ.setdefault('DEEPSEEK_MODEL', deepseek_model)
+                print("✅ API key loaded for text regeneration")
             except Exception as e:
-                print(f"⚠️ Warning: OpenAI API key not available: {e}")
+                print(f"⚠️ Warning: API key not available: {e}")
                 print("Text regeneration will be disabled")
     except Exception as e:
         print(f"Warning: Could not load FMP API key: {e}")

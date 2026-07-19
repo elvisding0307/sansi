@@ -75,7 +75,7 @@ class EquityResearchAgentManager:
         agent = self.agents[text_type]
         
         # Check if a custom model is specified via environment variable
-        custom_model = os.getenv('OPENAI_MODEL_NAME')
+        custom_model = os.getenv('DEEPSEEK_MODEL') or os.getenv('OPENAI_MODEL_NAME')
         
         # Run the agent with optional custom model
         if custom_model:
