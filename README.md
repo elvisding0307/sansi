@@ -1,4 +1,4 @@
-# FinRobot - AI-Powered Equity Research Report Generator
+# SanSi - AI-Powered Equity Research Report Generator
 
 Generate professional investment bank-style equity research reports with AI.
 
@@ -25,7 +25,7 @@ Generate professional investment bank-style equity research reports with AI.
 
 ```bash
 # 1. Configure API keys
-cp finrobot_equity/core/config/config.ini.example finrobot_equity/core/config/config.ini
+cp sansi/core/config/config.ini.example sansi/core/config/config.ini
 # Edit config.ini with your keys
 
 # 2. Set environment variables
@@ -51,7 +51,7 @@ chmod +x deploy.sh
 ### CLI usage
 
 ```bash
-cd finrobot_equity/core/src
+cd sansi/core/src
 
 # Step 1: Generate financial analysis
 python generate_financial_analysis.py \
@@ -85,6 +85,17 @@ User Input (ticker)
 | FMP | Financial data (primary) | No, falls back to yfinance |
 | yfinance | Financial data (fallback) | No, auto-installed |
 | Adanos | Retail sentiment (optional) | No |
+
+## Acknowledgments
+
+This project is derived from [FinRobot](https://github.com/AI4Finance-Foundation/FinRobot), an open-source AI agent platform for financial analysis by the [AI4Finance Foundation](https://github.com/AI4Finance-Foundation).
+
+Key changes from the original FinRobot:
+- Removed the multi-agent framework (AutoGen), retained only the equity research engine
+- Replaced OpenAI with DeepSeek for LLM inference
+- Added yfinance as a fallback data source when FMP is unavailable
+- Added full Chinese/English i18n support for UI and report generation
+- Simplified project structure and deployment
 
 ## License
 

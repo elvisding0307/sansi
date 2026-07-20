@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ################################################################################
-# FinRobot Equity Research - Complete Deployment Script
+# SanSi Equity Research - Complete Deployment Script
 # 
-# This script manages the complete FinRobot Equity Research module including:
+# This script manages the complete SanSi Equity Research module including:
 # - Virtual environment setup
 # - Dependency installation (core + equity + web)
 # - Web application startup
@@ -28,7 +28,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="${SCRIPT_DIR}/venv"
 PID_FILE="${SCRIPT_DIR}/.app.pid"
-LOG_DIR="${SCRIPT_DIR}/finrobot_equity/logs"
+LOG_DIR="${SCRIPT_DIR}/sansi/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/app.log"
 REQUIREMENTS_EQUITY="${SCRIPT_DIR}/requirements-equity.txt"
@@ -181,7 +181,7 @@ install_deps() {
         pip install -r "$REQUIREMENTS_EQUITY" 2>&1 | tail -5
     fi
     
-    # Note: finrobot_equity is a local module, no need to install separately
+    # Note: sansi is a local module, no need to install separately
     
     print_info "All dependencies installed successfully"
 }
@@ -191,7 +191,7 @@ install_deps() {
 # ============================================================================
 
 start_app() {
-    print_header "Starting FinRobot Equity Research Web Application"
+    print_header "Starting SanSi Equity Research Web Application"
     
     # Check if already running
     if [ -f "$PID_FILE" ]; then
@@ -238,7 +238,7 @@ start_app() {
     fi
     
     # Start the application
-    # Add current directory to PYTHONPATH so finrobot_equity can be imported
+    # Add current directory to PYTHONPATH so sansi can be imported
     export PYTHONPATH="$SCRIPT_DIR:$PYTHONPATH"
     
     nohup python "$SCRIPT_DIR/run_web_app.py" \
@@ -274,7 +274,7 @@ start_app() {
 }
 
 stop_app() {
-    print_header "Stopping FinRobot Equity Research Web Application"
+    print_header "Stopping SanSi Equity Research Web Application"
     
     if [ ! -f "$PID_FILE" ]; then
         print_warning "Application is not running (no PID file found)"
@@ -313,7 +313,7 @@ stop_app() {
 }
 
 check_status() {
-    print_header "FinRobot Equity Research Application Status"
+    print_header "SanSi Equity Research Application Status"
     
     if [ ! -f "$PID_FILE" ]; then
         print_warning "Application is not running"
@@ -342,7 +342,7 @@ check_status() {
 }
 
 restart_app() {
-    print_header "Restarting FinRobot Equity Research Web Application"
+    print_header "Restarting SanSi Equity Research Web Application"
     
     stop_app
     sleep 2
@@ -357,7 +357,7 @@ show_help() {
     cat << 'EOF'
 
 ================================================================================
-  FinRobot Equity Research - Deployment Script
+  SanSi Equity Research - Deployment Script
 ================================================================================
 
 USAGE:
@@ -415,8 +415,8 @@ CONFIGURATION:
   API Keys:
     Before using equity analysis, configure your API keys:
     
-    cp finrobot_equity/core/config/config.ini.example \
-       finrobot_equity/core/config/config.ini
+    cp sansi/core/config/config.ini.example \
+       sansi/core/config/config.ini
     
     Edit config.ini with your API keys:
     [API_KEYS]
@@ -429,8 +429,8 @@ ENVIRONMENT VARIABLES:
   WEB_RELOAD    Enable auto-reload (default: true)
 
 LOG FILES:
-  Application logs: finrobot_equity/logs/app.log
-  Task logs:        finrobot_equity/logs/task_{id}.log
+  Application logs: sansi/logs/app.log
+  Task logs:        sansi/logs/task_{id}.log
   Process ID file: .app.pid
 
 TROUBLESHOOTING:

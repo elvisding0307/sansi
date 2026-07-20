@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Start the FinRobot Equity Research Web Application
+Start the SanSi Equity Research Web Application
 
 This script starts the FastAPI web application for equity research analysis.
 
 Usage:
     python run_web_app.py
     
-    Or from the FinRobot root directory:
-    python -m finrobot_equity.run_web_app
+    Or from the SanSi root directory:
+    python -m sansi.run_web_app
 """
 
 import sys
@@ -28,7 +28,7 @@ def run_web_app(host: str = "127.0.0.1", port: int = 8001, reload: bool = True):
         reload: Whether to enable auto-reload on code changes
     """
     print("=" * 60)
-    print("FinRobot Equity Research Web Application")
+    print("SanSi Equity Research Web Application")
     print("=" * 60)
     print(f"\nStarting web application...")
     print(f"Host: {host}")
@@ -40,7 +40,7 @@ def run_web_app(host: str = "127.0.0.1", port: int = 8001, reload: bool = True):
         # Use import string for uvicorn so reload mode works
         # This allows uvicorn to reload the app when code changes
         uvicorn.run(
-            "finrobot_equity.web_app.main:app",
+            "sansi.web_app.main:app",
             host=host,
             port=port,
             reload=reload,
@@ -50,7 +50,7 @@ def run_web_app(host: str = "127.0.0.1", port: int = 8001, reload: bool = True):
         print(f"\nError: Could not import web application")
         print(f"Details: {e}")
         print("\nMake sure you have installed the required dependencies:")
-        print("  pip install finrobot[equity]")
+        print("  pip install -r requirements-equity.txt")
         sys.exit(1)
     except Exception as e:
         print(f"\nError starting web application: {e}")
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(
-        description="Start the FinRobot Equity Research Web Application"
+        description="Start the SanSi Equity Research Web Application"
     )
     parser.add_argument(
         "--host",

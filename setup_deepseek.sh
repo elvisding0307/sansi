@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# FinRobot + DeepSeek - Environment Setup
+# SanSi + DeepSeek - Environment Setup
 # Run before starting the project:
 #   source setup_deepseek.sh
 # ============================================================================
