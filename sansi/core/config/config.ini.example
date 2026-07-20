@@ -3,23 +3,19 @@
 # Get your free API key at: https://financialmodelingprep.com/developer
 fmp_api_key = YOUR_FMP_API_KEY
 
-# OpenAI API Key (or compatible API provider)
-# Get your API key at: https://platform.openai.com/account/api-keys
-openai_api_key = YOUR_OPENAI_API_KEY
+# DeepSeek API Key
+# Get your API key at: https://platform.deepseek.com
+deepseek_api_key = YOUR_DEEPSEEK_API_KEY
 
-# OpenAI Base URL (optional, change for proxy services like SiliconFlow)
-# Default: https://api.openai.com/v1
-openai_base_url = https://api.openai.com/v1
+# DeepSeek Base URL
+# Default: https://api.deepseek.com/v1
+deepseek_base_url = https://api.deepseek.com/v1
 
-# Model name (optional, change for proxy services)
-# Model name (optional, change for proxy services)
-# OpenAI Model (choose one of the following ):
-#   gpt-4.1       - Latest flagship model, best quality (recommended for production)
-#   gpt-4.1-mini  - Fast and cost-effective (recommended for development/testing)
-#   gpt-4o        - Previous generation flagship, stable and reliable
-#   gpt-4o-mini   - Previous generation lightweight model
-# Default: gpt-4.1-mini
-openai_model = gpt-4.1
+# DeepSeek Model
+#   deepseek-chat     - Standard model (recommended)
+#   deepseek-reasoner - Reasoning model
+# Default: deepseek-chat
+deepseek_model = deepseek-chat
 
 # Adanos Finance API key (optional, enables retail sentiment insights in equity reports)
 adanos_api_key = YOUR_ADANOS_API_KEY

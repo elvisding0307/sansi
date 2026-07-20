@@ -572,7 +572,7 @@ async def list_all_logs(request: Request):
     
     # 只有管理员可以查看所有日志
     # Admin emails can be configured via SANSI_ADMIN_EMAILS env var (comma-separated)
-    admin_emails = os.getenv("SANSI_ADMIN_EMAILS", "admin@sansi.ai").split(",")
+    admin_emails = os.getenv("SANSI_ADMIN_EMAILS", "admin").split(",")
     admin_emails = [e.strip() for e in admin_emails]
     if user.get("email") not in admin_emails:
         raise HTTPException(status_code=403, detail="Admin access required")

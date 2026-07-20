@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 
 <head>
     <meta charset="UTF-8">
@@ -48,19 +48,6 @@
         .hero-text { background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .nav-scroll::-webkit-scrollbar { display: none; }
         .nav-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .lang-btn {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            transition: all 0.2s;
-            background: transparent;
-            color: #94a3b8;
-        }
-        .lang-btn:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
-        .lang-btn.active { background: rgba(59,130,246,0.15); border-color: #3b82f6; color: #60a5fa; }
     </style>
 </head>
 <script>
@@ -120,7 +107,6 @@
                 </div>
                 <!-- Language Toggle + User Menu -->
                 <div class="flex items-center gap-2">
-                    <button class="lang-btn" @click="toggleLang" :title="lang === 'en' ? 'Switch to Chinese' : '切换到英文'">{{ lang === 'en' ? '中文' : 'EN' }}</button>
                     <div class="relative ml-2" @click.stop="showUserMenu = !showUserMenu">
                         <button class="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center text-white text-xs font-semibold hover:from-slate-500 hover:to-slate-600 transition-all border border-white/10">{{ userInitial }}</button>
                         <div v-if="showUserMenu" class="absolute right-0 top-10 w-56 bg-[#0a0a0a] border border-white/10 rounded-lg shadow-xl py-1 z-50">
@@ -209,15 +195,6 @@
                         <button type="button" @click="form.generate_pdf = !form.generate_pdf" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-medium border transition-all duration-200 flex items-center justify-center gap-1.5" :class="form.generate_pdf ? 'bg-purple-500/20 text-purple-300 border-purple-500/50' : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'">
                             <span class="w-1.5 h-1.5 rounded-full" :class="form.generate_pdf ? 'bg-purple-400' : 'bg-slate-600'"></span>{{ t('pdf_report') }}
                         </button>
-                    </div>
-                </div>
-
-                <!-- Report Language -->
-                <div>
-                    <label class="block text-[10px] font-medium text-slate-400 mb-2 ml-1">{{ t('report_language') }}</label>
-                    <div class="flex gap-2">
-                        <button type="button" @click="form.report_language = 'en'" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-medium border transition-all duration-200" :class="form.report_language === 'en' ? 'bg-blue-500/20 text-blue-300 border-blue-500/50' : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'">English</button>
-                        <button type="button" @click="form.report_language = 'zh'" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-medium border transition-all duration-200" :class="form.report_language === 'zh' ? 'bg-blue-500/20 text-blue-300 border-blue-500/50' : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'">中文</button>
                     </div>
                 </div>
 
@@ -460,144 +437,76 @@
         const { createApp } = Vue;
 
         const i18n = {
-            en: {
-                subtitle: 'AI-Powered Equity Research',
-                progress: 'Progress',
-                ready: 'READY',
-                step_1_3: 'STEP 1/3',
-                step_2_3: 'STEP 2/3',
-                enter_ticker: 'Enter Ticker Symbol',
-                check_company: 'Check Company Name',
-                ready_generate: 'Ready to Generate',
-                core_data: 'Core Data',
-                ticker_symbol: 'Ticker Symbol',
-                company_name: 'Company Name',
-                company_placeholder: 'Auto-filled or type...',
-                comparables: 'Comparables',
-                optional: 'Optional',
-                peers_placeholder: 'Space separated (e.g. MSFT GOOG)',
-                report_components: 'Report Components',
-                ai_text: 'AI Text',
-                pdf_report: 'PDF Report',
-                report_language: 'Report Language',
-                enhanced_analysis: 'Enhanced Analysis',
-                sensitivity: 'Sensitivity',
-                catalysts: 'Catalysts',
-                news_plus: 'News+',
-                charts_plus: 'Charts+',
-                waiting_ticker: 'Waiting for Ticker Symbol...',
-                waiting_company: 'Waiting for Company Name...',
-                generating: 'Generating...',
-                generate_report: 'Generate Research Report',
-                mission_control: 'Mission Control',
-                active_count: 'Active',
-                active_status: 'Active',
-                idle_status: 'Idle',
-                hero_title: 'Ready to Generate Reports',
-                hero_desc: 'Enter a stock ticker to generate comprehensive AI-powered equity research reports with professional valuation and risk analysis.',
-                start_new: 'Start New Analysis',
-                feature_highlights: 'Report Highlights',
-                feature_highlights_desc: 'Key metrics & insights',
-                feature_valuation: 'Valuation',
-                feature_valuation_desc: 'DCF & peer comparison',
-                feature_risk: 'Risk Analysis',
-                feature_risk_desc: 'Key risks & catalysts',
-                processing_queue: 'Processing Queue',
-                running_badge: 'RUNNING',
-                current_stage: 'Current Stage',
-                view_logs: 'View Logs',
-                hide_logs: 'Hide Logs',
-                close_logs: 'Close Logs',
-                research_archive: 'Research Archive',
-                task_log: 'Task Log',
-                download: 'Download',
-                download_log: 'Download full log',
-                view_log: 'View Log',
-                finalizing: 'Finalizing...',
-                no_logs: 'No logs available for this task.',
-                delete: 'Delete',
-                change_password: 'Change Password',
-                current_password: 'Current Password',
-                new_password: 'New Password',
-                confirm_password: 'Confirm New Password',
-                cancel: 'Cancel',
-                save: 'Save',
-                saving: 'Saving...',
-                sign_out: 'Sign out',
-                password_changed: 'Password changed successfully',
-            },
-            zh: {
-                subtitle: 'AI 驱动的股票研究',
-                progress: '进度',
-                ready: '就绪',
-                step_1_3: '步骤 1/3',
-                step_2_3: '步骤 2/3',
-                enter_ticker: '输入股票代码',
-                check_company: '确认公司名称',
-                ready_generate: '准备生成',
-                core_data: '核心数据',
-                ticker_symbol: '股票代码',
-                company_name: '公司名称',
-                company_placeholder: '自动填充或手动输入...',
-                comparables: '同行对比',
-                optional: '可选',
-                peers_placeholder: '空格分隔 (例如 MSFT GOOG)',
-                report_components: '报告组件',
-                ai_text: 'AI 文案',
-                pdf_report: 'PDF 报告',
-                report_language: '报告语言',
-                enhanced_analysis: '增强分析',
-                sensitivity: '敏感性',
-                catalysts: '催化剂',
-                news_plus: '新闻+',
-                charts_plus: '图表+',
-                waiting_ticker: '等待输入股票代码...',
-                waiting_company: '等待输入公司名称...',
-                generating: '生成中...',
-                generate_report: '生成研究报告',
-                mission_control: '任务中心',
-                active_count: '运行中',
-                active_status: '活跃',
-                idle_status: '空闲',
-                hero_title: '准备生成报告',
-                hero_desc: '输入股票代码，即可生成包含专业估值和风险分析的 AI 驱动股票研究报告。',
-                start_new: '开始新分析',
-                feature_highlights: '报告亮点',
-                feature_highlights_desc: '关键指标与洞察',
-                feature_valuation: '估值分析',
-                feature_valuation_desc: 'DCF 与同行对比',
-                feature_risk: '风险分析',
-                feature_risk_desc: '核心风险与催化剂',
-                processing_queue: '处理队列',
-                running_badge: '运行中',
-                current_stage: '当前阶段',
-                view_logs: '查看日志',
-                hide_logs: '隐藏日志',
-                close_logs: '关闭日志',
-                research_archive: '报告存档',
-                task_log: '任务日志',
-                download: '下载',
-                download_log: '下载完整日志',
-                view_log: '查看日志',
-                finalizing: '收尾中...',
-                no_logs: '该任务无可用日志。',
-                delete: '删除',
-                change_password: '修改密码',
-                current_password: '当前密码',
-                new_password: '新密码',
-                confirm_password: '确认新密码',
-                cancel: '取消',
-                save: '保存',
-                saving: '保存中...',
-                sign_out: '退出登录',
-                password_changed: '密码修改成功',
-            },
+            subtitle: 'AI 驱动的股票研究',
+            progress: '进度',
+            ready: '就绪',
+            step_1_3: '步骤 1/3',
+            step_2_3: '步骤 2/3',
+            enter_ticker: '输入股票代码',
+            check_company: '确认公司名称',
+            ready_generate: '准备生成',
+            core_data: '核心数据',
+            ticker_symbol: '股票代码',
+            company_name: '公司名称',
+            company_placeholder: '自动填充或手动输入...',
+            comparables: '同行对比',
+            optional: '可选',
+            peers_placeholder: '空格分隔 (例如 MSFT GOOG)',
+            report_components: '报告组件',
+            ai_text: 'AI 文案',
+            pdf_report: 'PDF 报告',
+            report_language: '报告语言',
+            enhanced_analysis: '增强分析',
+            sensitivity: '敏感性',
+            catalysts: '催化剂',
+            news_plus: '新闻+',
+            charts_plus: '图表+',
+            waiting_ticker: '等待输入股票代码...',
+            waiting_company: '等待输入公司名称...',
+            generating: '生成中...',
+            generate_report: '生成研究报告',
+            mission_control: '任务中心',
+            active_count: '运行中',
+            active_status: '活跃',
+            idle_status: '空闲',
+            hero_title: '准备生成报告',
+            hero_desc: '输入股票代码，即可生成包含专业估值和风险分析的 AI 驱动股票研究报告。',
+            start_new: '开始新分析',
+            feature_highlights: '报告亮点',
+            feature_highlights_desc: '关键指标与洞察',
+            feature_valuation: '估值分析',
+            feature_valuation_desc: 'DCF 与同行对比',
+            feature_risk: '风险分析',
+            feature_risk_desc: '核心风险与催化剂',
+            processing_queue: '处理队列',
+            running_badge: '运行中',
+            current_stage: '当前阶段',
+            view_logs: '查看日志',
+            hide_logs: '隐藏日志',
+            close_logs: '关闭日志',
+            research_archive: '报告存档',
+            task_log: '任务日志',
+            download: '下载',
+            download_log: '下载完整日志',
+            view_log: '查看日志',
+            finalizing: '收尾中...',
+            no_logs: '该任务无可用日志。',
+            delete: '删除',
+            change_password: '修改密码',
+            current_password: '当前密码',
+            new_password: '新密码',
+            confirm_password: '确认新密码',
+            cancel: '取消',
+            save: '保存',
+            saving: '保存中...',
+            sign_out: '退出登录',
+            password_changed: '密码修改成功',
         };
 
         createApp({
             data() {
                 return {
-                    lang: localStorage.getItem('sansi_lang') || 'en',
+                    lang: 'zh',
                     userName: window.USER_DATA?.name || '',
                     userEmail: window.USER_DATA?.email || '',
                     showUserMenu: false,
@@ -623,7 +532,7 @@
                         enable_enhanced_news: false,
                         enable_enhanced_charts: false,
                         enable_valuation_analysis: false,
-                        report_language: 'en'
+                        report_language: 'zh'
                     },
                     tasks: [],
                     pollInterval: null,
@@ -642,24 +551,21 @@
                 this.loadHistory();
             },
             methods: {
-                t(key) { return (i18n[this.lang] || i18n.en)[key] || key; },
+                t(key) { return i18n[key] || key; },
                 $tStage(stage) {
                     const map = {
-                        'Initializing...': this.lang === 'zh' ? '初始化...' : 'Initializing...',
-                        'Data Acquisition...': this.lang === 'zh' ? '数据获取...' : 'Data Acquisition...',
-                        'Financial Analysis...': this.lang === 'zh' ? '财务分析...' : 'Financial Analysis...',
-                        'AI Reasoning...': this.lang === 'zh' ? 'AI 推理...' : 'AI Reasoning...',
-                        'Report Compilation...': this.lang === 'zh' ? '报告编译...' : 'Report Compilation...',
-                        'Analysis Completed': this.lang === 'zh' ? '分析完成' : 'Analysis Completed',
-                        'Analysis Failed': this.lang === 'zh' ? '分析失败' : 'Analysis Failed',
-                        'Completed': this.lang === 'zh' ? '已完成' : 'Completed',
-                        'Submission Failed': this.lang === 'zh' ? '提交失败' : 'Submission Failed',
+                        'Initializing...': '初始化...',
+                        'Data Acquisition...': '数据获取...',
+                        'Financial Analysis...': '财务分析...',
+                        'AI Reasoning...': 'AI 推理...',
+                        'Report Compilation...': '报告编译...',
+                        'Analysis Completed': '分析完成',
+                        'Analysis Failed': '分析失败',
+                        'Completed': '已完成',
+                        'Submission Failed': '提交失败',
                     };
                     return map[stage] || stage;
                 },
-                setLang(l) { this.lang = l; localStorage.setItem('sansi_lang', l); },
-                toggleLang() { this.setLang(this.lang === 'en' ? 'zh' : 'en'); },
-
                 async loadHistory() {
                     try {
                         const resp = await fetch('/api/history');
@@ -682,7 +588,7 @@
                     } catch (e) { console.warn('Failed to load history:', e); }
                 },
                 async deleteTask(task) {
-                    const msg = this.lang === 'zh' ? `确认删除 ${task.ticker} 的报告？` : `Delete report for ${task.ticker}?`;
+                    const msg = `确认删除 ${task.ticker} 的报告？`;
                     if (!confirm(msg)) return;
                     try {
                         const resp = await fetch(`/api/history/${task.id}`, { method: 'DELETE' });
@@ -708,7 +614,7 @@
                         id: 'pending_' + Date.now(), ticker: this.form.ticker,
                         company: this.form.company_name, status: 'pending',
                         progress: 5,
-                        stage: this.lang === 'zh' ? '初始化...' : 'Initializing...',
+                        stage: '初始化...',
                         logs: ['Requesting analysis start...'], showLogs: false, startTime: new Date()
                     };
                     this.tasks.unshift(newTask);
@@ -730,7 +636,7 @@
                     } catch (e) {
                         console.error(e);
                         newTask.status = 'failed';
-                        newTask.stage = this.lang === 'zh' ? '提交失败' : 'Submission Failed';
+                        newTask.stage = '提交失败';
                         newTask.logs.push(`Error starting analysis: ${e.message}`);
                     }
                 },
@@ -747,21 +653,20 @@
                                 task.status = data.status;
                                 if (data.status === 'completed') {
                                     task.progress = 100;
-                                    task.stage = this.lang === 'zh' ? '分析完成' : 'Analysis Completed';
+                                    task.stage = '分析完成';
                                     this.fetchTaskReports(task);
-                                } else { task.stage = this.lang === 'zh' ? '分析失败' : 'Analysis Failed'; }
+                                } else { task.stage = '分析失败'; }
                             } else { this.updateTaskProgress(task); }
                         } catch (e) { console.error(`Polling error for ${task.id}`, e); }
                     }
                 },
                 updateTaskProgress(task) {
                     const allLogs = task.logs.join(" ");
-                    const zh = this.lang === 'zh';
-                    if (allLogs.includes("Pipeline completed successfully")) { task.progress = 100; task.stage = zh ? '已完成' : 'Completed'; }
-                    else if (allLogs.includes("Generating PDF report") || allLogs.includes("create_equity_report.py")) { task.progress = 75; task.stage = zh ? '报告编译...' : 'Report Compilation...'; }
-                    else if (allLogs.includes("AI") || allLogs.includes("text")) { task.progress = 50; task.stage = zh ? 'AI 推理...' : 'AI Reasoning...'; }
-                    else if (allLogs.includes("generate_financial_analysis.py") || allLogs.includes("financial")) { task.progress = 35; task.stage = zh ? '财务分析...' : 'Financial Analysis...'; }
-                    else if (allLogs.includes("Starting analysis pipeline") || allLogs.includes("Executing")) { task.progress = 10; task.stage = zh ? '数据获取...' : 'Data Acquisition...'; }
+                    if (allLogs.includes("Pipeline completed successfully")) { task.progress = 100; task.stage = '已完成'; }
+                    else if (allLogs.includes("Generating PDF report") || allLogs.includes("create_equity_report.py")) { task.progress = 75; task.stage = '报告编译...'; }
+                    else if (allLogs.includes("AI") || allLogs.includes("text")) { task.progress = 50; task.stage = 'AI 推理...'; }
+                    else if (allLogs.includes("generate_financial_analysis.py") || allLogs.includes("financial")) { task.progress = 35; task.stage = '财务分析...'; }
+                    else if (allLogs.includes("Starting analysis pipeline") || allLogs.includes("Executing")) { task.progress = 10; task.stage = '数据获取...'; }
                 },
                 async fetchTaskReports(task) {
                     try {
@@ -785,8 +690,8 @@
                 async changePassword() {
                     this.passwordError = '';
                     this.passwordSuccess = '';
-                    if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) { this.passwordError = this.lang === 'zh' ? '两次密码不一致' : 'New passwords do not match'; return; }
-                    if (this.passwordForm.newPassword.length < 6) { this.passwordError = this.lang === 'zh' ? '密码至少6位' : 'Password must be at least 6 characters'; return; }
+                    if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) { this.passwordError = '两次密码不一致'; return; }
+                    if (this.passwordForm.newPassword.length < 6) { this.passwordError = '密码至少6位'; return; }
                     this.passwordLoading = true;
                     try {
                         const response = await fetch('/api/auth/change-password', {
@@ -795,7 +700,7 @@
                         });
                         const data = await response.json();
                         if (!response.ok) throw new Error(data.detail || 'Failed to change password');
-                        this.passwordSuccess = this.lang === 'zh' ? '密码修改成功' : 'Password changed successfully';
+                        this.passwordSuccess = '密码修改成功';
                         this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
                         setTimeout(() => { this.showChangePassword = false; this.passwordSuccess = ''; }, 2000);
                     } catch (e) { this.passwordError = e.message; }

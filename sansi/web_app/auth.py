@@ -151,28 +151,22 @@ def init_default_admin():
     """Initialize default admin user if no users exist.
     
     Admin credentials can be configured via environment variables:
-        SANSI_ADMIN_EMAIL (default: admin@sansi.ai)
-        SANSI_ADMIN_PASSWORD (default: randomly generated)
-    
-    IMPORTANT: Change the default admin password immediately after first login.
+        SANSI_ADMIN_EMAIL (default: admin)
+        SANSI_ADMIN_PASSWORD (default: admin)
     """
-    import secrets
     db = SessionLocal()
     try:
         stats = crud.get_user_stats(db)
         if stats["total_users"] == 0:
-            admin_email = os.getenv("SANSI_ADMIN_EMAIL", "admin@sansi.ai")
-            admin_password = os.getenv("SANSI_ADMIN_PASSWORD", secrets.token_urlsafe(12))
+            admin_email = os.getenv("SANSI_ADMIN_EMAIL", "admin")
+            admin_password = os.getenv("SANSI_ADMIN_PASSWORD", "admin")
             crud.create_user(
                 db=db,
                 email=admin_email,
                 password=admin_password,
-                name="Admin User",
+                name="admin",
                 provider="local"
             )
             print(f"✅ Created default admin user: {admin_email}")
-            if not os.getenv("SANSI_ADMIN_PASSWORD"):
-                print(f"⚠️  Generated admin password: {admin_password}")
-                print("⚠️  Please change this password immediately after first login!")
     finally:
         db.close()

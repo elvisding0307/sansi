@@ -18,7 +18,7 @@ import uvicorn
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-def run_web_app(host: str = "127.0.0.1", port: int = 8001, reload: bool = True):
+def run_web_app(host: str = "127.0.0.1", port: int = 8888, reload: bool = True):
     """
     Start the web application
     
@@ -71,8 +71,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--port",
         type=int,
-        default=8001,
-        help="Port number to bind to (default: 8001)"
+        default=8888,
+        help="Port number to bind to (default: 8888)"
     )
     parser.add_argument(
         "--reload",

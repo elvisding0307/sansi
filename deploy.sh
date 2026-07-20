@@ -35,7 +35,7 @@ REQUIREMENTS_EQUITY="${SCRIPT_DIR}/requirements-equity.txt"
 
 # Web app configuration
 WEB_HOST="${WEB_HOST:-127.0.0.1}"
-WEB_PORT="${WEB_PORT:-8001}"
+WEB_PORT="${WEB_PORT:-8888}"
 WEB_RELOAD="${WEB_RELOAD:-true}"
 
 # Colors for output
@@ -373,7 +373,7 @@ COMMANDS:
 
 OPTIONS:
   --host HOST       Host address (default: 127.0.0.1)
-  --port PORT       Port number (default: 8001)
+  --port PORT       Port number (default: 8888)
   --no-reload       Disable auto-reload (for production)
 
 EXAMPLES:
@@ -425,7 +425,7 @@ CONFIGURATION:
 
 ENVIRONMENT VARIABLES:
   WEB_HOST      Host address (default: 127.0.0.1)
-  WEB_PORT      Port number (default: 8001)
+  WEB_PORT      Port number (default: 8888)
   WEB_RELOAD    Enable auto-reload (default: true)
 
 LOG FILES:

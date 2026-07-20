@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -210,19 +210,6 @@
             border-color: rgba(239, 68, 68, 0.7) !important;
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
         }
-        .lang-btn {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            transition: all 0.2s;
-            background: transparent;
-            color: #94a3b8;
-        }
-        .lang-btn:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
-        .lang-btn.active { background: rgba(59,130,246,0.15); border-color: #3b82f6; color: #60a5fa; }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-[#0a0a0a] text-white">
@@ -231,6 +218,7 @@
     <div class="cursor-trail" id="cursorTrail"></div>
     <canvas id="cursorCanvas" class="fixed inset-0 pointer-events-none z-[9996]"></canvas>
     
+    {% raw %}
     <div id="app" class="w-full h-full flex flex-col">
         <!-- 全局顶部栏 -->
         <header class="h-20 flex-shrink-0 bg-[#0a0a0a] flex items-center px-6 justify-between">
@@ -242,7 +230,6 @@
             </div>
             <div class="flex items-center gap-4">
                 <div class="text-sm font-bold text-white">{{ $t('subtitle') }}</div>
-                <button class="lang-btn" @click="toggleLang" :title="lang === 'en' ? 'Switch to Chinese' : '切换到英文'">{{ lang === 'en' ? '中文' : 'EN' }}</button>
             </div>
         </header>
 
@@ -293,13 +280,13 @@
                                     <div>
                                         <label class="block text-xs font-medium text-slate-400 mb-1">{{ $t('email') }}</label>
                                         <div class="halo-input-wrapper">
-                                            <input type="email" autocomplete="email" required v-model="email" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasError }]" :placeholder="$t('email_placeholder')">
+                                            <input type="text" v-model="email" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasError }]" :placeholder="$t('email_placeholder')">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-medium text-slate-400 mb-1">{{ $t('password_label') }}</label>
                                         <div class="halo-input-wrapper">
-                                            <input type="password" autocomplete="current-password" required v-model="password" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasError }]" :placeholder="$t('password_placeholder')">
+                                            <input type="password" v-model="password" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasError }]" :placeholder="$t('password_placeholder')">
                                         </div>
                                     </div>
                                 </div>
@@ -336,19 +323,19 @@
                                     <div>
                                         <label class="block text-xs font-medium text-slate-400 mb-1">{{ $t('full_name') }}</label>
                                         <div class="halo-input-wrapper">
-                                            <input type="text" required v-model="regName" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasRegError }]" :placeholder="$t('name_placeholder')">
+                                            <input type="text" v-model="regName" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasRegError }]" :placeholder="$t('name_placeholder')">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-medium text-slate-400 mb-1">{{ $t('email') }}</label>
                                         <div class="halo-input-wrapper">
-                                            <input type="email" autocomplete="email" required v-model="regEmail" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasRegError }]" :placeholder="$t('email_placeholder')">
+                                            <input type="text" v-model="regEmail" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasRegError }]" :placeholder="$t('email_placeholder')">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-medium text-slate-400 mb-1">{{ $t('password_label') }}</label>
                                         <div class="halo-input-wrapper">
-                                            <input type="password" required minlength="6" v-model="regPassword" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasRegError }]" :placeholder="$t('password_min_chars')">
+                                            <input type="password" v-model="regPassword" v-bind:class="['halo-input block w-full rounded-lg px-3 py-2.5 text-white placeholder-slate-500 text-sm', { 'input-error': hasRegError }]" :placeholder="$t('password_min_chars')">
                                         </div>
                                     </div>
                                 </div>
@@ -367,70 +354,42 @@
             </div>
         </div>
     </div>
+    {% endraw %}
 
     <script>
         const loginI18n = {
-            en: {
-                subtitle: 'AI-Powered Equity Research',
-                morph_1: 'AI-Powered Equity Research',
-                morph_2: 'Professional Stock Analysis',
-                morph_3: 'Smart Financial Insights',
-                morph_4: 'Automated Report Generation',
-                hero_desc: 'Generate professional equity research reports with financial analysis, valuation models, and risk assessment',
-                welcome_back: 'Welcome Back',
-                sign_in_desc: 'Sign in to access your research dashboard',
-                invalid_credentials: 'Invalid email or password',
-                email: 'Email Address',
-                email_placeholder: 'name@example.com',
-                password_label: 'Password',
-                password_placeholder: 'Enter password',
-                password_min_chars: 'At least 6 characters',
-                remember_me: 'Remember me',
-                signing_in: 'Signing in...',
-                sign_in: 'Sign In',
-                no_account: "Don't have an account?",
-                sign_up: 'Sign up',
-                create_account: 'Create Account',
-                create_account_desc: 'Start generating professional equity research reports',
-                full_name: 'Full Name',
-                name_placeholder: 'Enter your name',
-                creating: 'Creating...',
-                have_account: 'Already have an account?',
-            },
-            zh: {
-                subtitle: 'AI 驱动的股票研究',
-                morph_1: 'AI 驱动的股票研究',
-                morph_2: '专业股票分析',
-                morph_3: '智能金融洞察',
-                morph_4: '自动报告生成',
-                hero_desc: '生成包含财务分析、估值模型和风险评估的专业股票研究报告',
-                welcome_back: '欢迎回来',
-                sign_in_desc: '登录以访问研究仪表盘',
-                invalid_credentials: '邮箱或密码错误',
-                email: '邮箱地址',
-                email_placeholder: 'name@example.com',
-                password_label: '密码',
-                password_placeholder: '输入密码',
-                password_min_chars: '至少6位字符',
-                remember_me: '记住我',
-                signing_in: '登录中...',
-                sign_in: '登录',
-                no_account: '还没有账号？',
-                sign_up: '注册',
-                create_account: '创建账号',
-                create_account_desc: '开始生成专业股票研究报告',
-                full_name: '姓名',
-                name_placeholder: '输入你的姓名',
-                creating: '创建中...',
-                have_account: '已有账号？',
-            }
+            subtitle: 'AI 驱动的股票研究',
+            morph_1: 'AI 驱动的股票研究',
+            morph_2: '专业股票分析',
+            morph_3: '智能金融洞察',
+            morph_4: '自动报告生成',
+            hero_desc: '生成包含财务分析、估值模型和风险评估的专业股票研究报告',
+            welcome_back: '欢迎回来',
+            sign_in_desc: '登录以访问研究仪表盘',
+            invalid_credentials: '邮箱或密码错误',
+            email: '用户名 / 邮箱地址',
+            email_placeholder: 'name@example.com',
+            password_label: '密码',
+            password_placeholder: '输入密码',
+            password_min_chars: '至少6位字符',
+            remember_me: '记住我',
+            signing_in: '登录中...',
+            sign_in: '登录',
+            no_account: '还没有账号？',
+            sign_up: '注册',
+            create_account: '创建账号',
+            create_account_desc: '开始生成专业股票研究报告',
+            full_name: '姓名',
+            name_placeholder: '输入你的姓名',
+            creating: '创建中...',
+            have_account: '已有账号？',
         };
 
         const { createApp } = Vue;
         createApp({
             data() {
                 return {
-                    lang: localStorage.getItem('sansi_lang') || 'en',
+                    lang: 'zh',
                     isRegister: false,
                     loading: false,
                     error: '',
@@ -458,9 +417,7 @@
                 } 
             },
             methods: {
-                $t(key) { return (loginI18n[this.lang] || loginI18n.en)[key] || key; },
-                setLang(l) { this.lang = l; localStorage.setItem('sansi_lang', l); },
-                toggleLang() { this.setLang(this.lang === 'en' ? 'zh' : 'en'); },
+                $t(key) { return loginI18n[key] || key; },
                 async handleLogin() {
                     this.loading = true; 
                     this.error = '';
