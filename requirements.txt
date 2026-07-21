@@ -34,6 +34,9 @@ beautifulsoup4>=4.11.0
 # YAML configuration
 pyyaml>=6.0
 
+# Environment variable loading
+python-dotenv>=1.0.0
+
 # Web application
 fastapi>=0.100.0
 sqlalchemy>=2.0.0

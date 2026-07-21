@@ -10,6 +10,12 @@ import secrets
 import httpx
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict
+
+from dotenv import load_dotenv
+
+# Load .env from project root (two levels up from web_app/)
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+
 from fastapi import FastAPI, Request, BackgroundTasks, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
