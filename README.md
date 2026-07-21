@@ -25,20 +25,15 @@ Generate professional investment bank-style equity research reports with AI.
 
 ```bash
 # 1. Configure API keys
-cp sansi/core/config/config.ini.example sansi/core/config/config.ini
-# Edit config.ini with your keys
+cp .env.example .env
+# Edit .env with your API keys
 
-# 2. Set environment variables
-export DEEPSEEK_API_KEY="your-key"
-export DEEPSEEK_BASE_URL="https://api.deepseek.com/v1"
-export DEEPSEEK_MODEL="deepseek-chat"
+# 2. Install dependencies
+pip install -r requirements.txt
 
-# 3. Install dependencies
-pip install -r requirements-equity.txt
-
-# 4. Start web app
+# 3. Start web app
 python run_web_app.py
-# Open http://127.0.0.1:8001
+# Open http://127.0.0.1:8888
 ```
 
 Or use the deploy script:
@@ -51,7 +46,7 @@ chmod +x deploy.sh
 ### CLI usage
 
 ```bash
-cd sansi/core/src
+cd src/core/src
 
 # Step 1: Generate financial analysis
 python generate_financial_analysis.py \

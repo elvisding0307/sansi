@@ -5,10 +5,8 @@ AI-powered equity research report generator. Fetches financial data, runs LLM-ba
 ## Architecture
 
 ```
-sansi/
+src/
 ├── core/                              # Analysis engine
-│   ├── config/
-│   │   └── config.ini.template        # API key configuration template
 │   ├── assets/                        # Static assets (logos for PDF reports)
 │   ├── src/
 │   │   ├── generate_financial_analysis.py   # Step 1: Data fetching & analysis
@@ -86,19 +84,18 @@ The report generation follows a two-step pipeline:
 ### 1. Configure API Keys
 
 ```bash
-cp sansi/core/config/config.ini.template sansi/core/config/config.ini
+cp .env.example .env
 ```
 
-Edit `config.ini` with your keys:
+Edit `.env` with your API keys:
 
 ```ini
-[API_KEYS]
-fmp_api_key = YOUR_FMP_API_KEY          # https://financialmodelingprep.com/developer
-openai_api_key = YOUR_OPENAI_API_KEY    # https://platform.openai.com/account/api-keys
-adanos_api_key = YOUR_ADANOS_API_KEY    # Optional: enables Retail Sentiment Insights
+FMP_API_KEY=YOUR_FMP_API_KEY
+DEEPSEEK_API_KEY=YOUR_DEEPSEEK_API_KEY
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+DEEPSEEK_MODEL=deepseek-chat
+ADANOS_API_KEY=YOUR_ADANOS_API_KEY
 ```
-
-If `adanos_api_key` is configured, the report pipeline adds an optional **Retail Sentiment Insights** layer to the equity research output. It supplements the existing news workflow with structured public-retail activity snapshots across Reddit, X.com, and Polymarket.
 
 ### 2. Deploy via Script
 
@@ -107,21 +104,20 @@ chmod +x deploy.sh
 ./deploy.sh start
 ```
 
-Access the web interface at `http://127.0.0.1:8001`.
+Access the web interface at `http://127.0.0.1:8888`.
 
 ### 3. Or Run via Command Line
 
 ```bash
 # Step 1: Financial analysis
-python sansi/core/src/generate_financial_analysis.py \
+python src/core/src/generate_financial_analysis.py \
     --company-ticker NVDA \
     --company-name "NVIDIA Corporation" \
-    --config-file sansi/core/config/config.ini \
     --peer-tickers AMD INTC \
     --generate-text-sections
 
 # Step 2: Generate report
-python sansi/core/src/create_equity_report.py \
+python src/core/src/create_equity_report.py \
     --company-ticker NVDA \
     --company-name "NVIDIA Corporation" \
     --analysis-csv output/NVDA/analysis/financial_metrics_and_forecasts.csv \
@@ -134,8 +130,7 @@ python sansi/core/src/create_equity_report.py \
     --competitor-analysis-file output/NVDA/analysis/competitor_analysis.txt \
     --major-takeaways-file output/NVDA/analysis/major_takeaways.txt \
     --peer-ev-ebitda-csv output/NVDA/analysis/peer_ev_ebitda_comparison.csv \
-    --enable-text-regeneration \
-    --config-file sansi/core/config/config.ini
+    --enable-text-regeneration
 ```
 
 ## Deployment Commands

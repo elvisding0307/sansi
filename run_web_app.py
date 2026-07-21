@@ -8,7 +8,7 @@ Usage:
     python run_web_app.py
     
     Or from the SanSi root directory:
-    python -m sansi.run_web_app
+    python -m src.run_web_app
 """
 
 import sys
@@ -40,7 +40,7 @@ def run_web_app(host: str = "127.0.0.1", port: int = 8888, reload: bool = True):
         # Use import string for uvicorn so reload mode works
         # This allows uvicorn to reload the app when code changes
         uvicorn.run(
-            "sansi.web_app.main:app",
+            "src.web_app.main:app",
             host=host,
             port=port,
             reload=reload,
@@ -50,7 +50,7 @@ def run_web_app(host: str = "127.0.0.1", port: int = 8888, reload: bool = True):
         print(f"\nError: Could not import web application")
         print(f"Details: {e}")
         print("\nMake sure you have installed the required dependencies:")
-        print("  pip install -r requirements-equity.txt")
+        print("  pip install -r requirements.txt")
         sys.exit(1)
     except Exception as e:
         print(f"\nError starting web application: {e}")

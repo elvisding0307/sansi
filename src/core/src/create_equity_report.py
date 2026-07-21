@@ -9,7 +9,6 @@ import pytz
 
 EASTERN_TZ = pytz.timezone('America/New_York')
 
-from modules.common_utils import load_config, get_api_key
 from modules.report_data_loader import load_analysis_csv, load_text_from_file
 from modules.html_renderer import render_html_report, render_combined_html_report, HTML_TEMPLATE_PAGE_1, HTML_TEMPLATE_PAGE_2_FINANCIAL_SUMMARY, HTML_TEMPLATE_PAGE_3_PEER_COMPARISON, HTML_TEMPLATE_PAGE_4_SENSITIVITY_CATALYST, HTML_TEMPLATE_PAGE_5_NEWS_CHARTS, HTML_TEMPLATE_COMBINED, format_dataframe_to_html_table
 from modules.html_template_professional import render_professional_html_report
@@ -350,7 +349,6 @@ def main():
     parser.add_argument("--sector", type=str, default=None, help="Company sector (will be auto-fetched if not provided).")
 
     # Configuration and paths
-    parser.add_argument("--config-file", type=str, default=None, help="Path to config.ini file.")
     parser.add_argument("--logo-image-path", type=str, default="./assets/piclogo.png", help="Path to the logo image.")
     parser.add_argument("--revenue-chart-path", type=str, default=None, help="Path to a pre-generated revenue/EBITDA chart.")
     parser.add_argument("--ev-ebitda-chart-path", type=str, default=None, help="Path to a pre-generated EV/EBITDA peer comparison chart.")
@@ -378,31 +376,24 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
     print(f"HTML reports will be saved to: {output_dir}")
 
-    # --- Load configuration and API key ---
+    # --- Load API keys from environment ---
     openai_api_key = None
-    try:
-        config = load_config(args.config_file)
-        fmp_api_key = get_api_key(config, "API_KEYS", "fmp_api_key")
-        if args.enable_text_regeneration:
-            try:
-                # Support both deepseek_api_key and openai_api_key
-                openai_api_key = config.get("API_KEYS", "deepseek_api_key", fallback=None)
-                if not openai_api_key:
-                    openai_api_key = get_api_key(config, "API_KEYS", "openai_api_key")
-                # Also set env vars for openai-agents SDK and text_generator fallback
-                os.environ['OPENAI_API_KEY'] = openai_api_key
-                deepseek_base_url = config.get("API_KEYS", "deepseek_base_url", fallback="https://api.deepseek.com/v1")
-                deepseek_model = config.get("API_KEYS", "deepseek_model", fallback="deepseek-chat")
-                os.environ.setdefault('OPENAI_BASE_URL', deepseek_base_url)
-                os.environ.setdefault('DEEPSEEK_BASE_URL', deepseek_base_url)
-                os.environ.setdefault('DEEPSEEK_MODEL', deepseek_model)
-                print("✅ API key loaded for text regeneration")
-            except Exception as e:
-                print(f"⚠️ Warning: API key not available: {e}")
-                print("Text regeneration will be disabled")
-    except Exception as e:
-        print(f"Warning: Could not load FMP API key: {e}")
-        fmp_api_key = None
+    fmp_api_key = os.getenv("FMP_API_KEY")
+    if args.enable_text_regeneration:
+        openai_api_key = os.getenv("DEEPSEEK_API_KEY")
+        if openai_api_key:
+            os.environ['OPENAI_API_KEY'] = openai_api_key
+            deepseek_base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+            deepseek_model = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+            os.environ.setdefault('OPENAI_BASE_URL', deepseek_base_url)
+            os.environ.setdefault('DEEPSEEK_BASE_URL', deepseek_base_url)
+            os.environ.setdefault('DEEPSEEK_MODEL', deepseek_model)
+            print("✅ API key loaded for text regeneration")
+        else:
+            print("⚠️ Warning: DEEPSEEK_API_KEY not set, text regeneration disabled")
+
+    if not fmp_api_key:
+        print("Warning: FMP_API_KEY not set, market data auto-fetch will be skipped")
 
     # --- Auto-fetch market data if not provided and API key available ---
     auto_fetched_metrics = {}

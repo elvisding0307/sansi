@@ -7,8 +7,7 @@ import requests
 import datetime
 import os
 
-# Assuming common_utils.py is in the same parent directory (src/modules)
-from .common_utils import get_api_key, load_config 
+
 
 def fetch_yfinance_volume(ticker: str, start_date: str, end_date: str) -> pd.DataFrame | None:
     """Fetches historical trading volume data using yfinance."""
@@ -1007,27 +1006,11 @@ def get_company_news(ticker: str, api_key: str, days_back: int = 5, limit: int =
 
 if __name__ == "__main__":
     print("Testing market_data_api.py...")
-    current_script_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path_test = os.path.join(current_script_dir, "..", "..", "config", "config.ini")
-    
-    fmp_api_key_for_test = "YOUR_FMP_KEY_HERE" 
-    if not os.path.exists(config_path_test):
-        print(f"Test config file not found at {config_path_test}. Creating a dummy one for structure test.")
-        os.makedirs(os.path.dirname(config_path_test), exist_ok=True)
-        with open(config_path_test, "w") as f:
-            f.write("[API_KEYS]\n")
-            f.write("fmp_api_key = YOUR_FMP_KEY_HERE\n")
-        print("Please put a valid FMP API key in the dummy config.ini to run live tests.")
-    else:
-        try:
-            test_config = load_config(config_path_test)
-            fmp_api_key_for_test = get_api_key(test_config, section="API_KEYS", key="fmp_api_key")
-        except Exception as e:
-            print(f"Error loading test config: {e}")
+    fmp_api_key_for_test = os.getenv("FMP_API_KEY", "").strip()
 
-    if fmp_api_key_for_test != "YOUR_FMP_KEY_HERE" and fmp_api_key_for_test:
+    if fmp_api_key_for_test:
         print(f"\nUsing FMP API Key: {fmp_api_key_for_test[:5]}... for live FMP tests")
-        
+
         print("\nTesting get_comprehensive_financial_data for AAPL...")
         financial_data = get_comprehensive_financial_data("AAPL", fmp_api_key_for_test)
         for statement_type, df in financial_data.items():
@@ -1036,6 +1019,6 @@ if __name__ == "__main__":
             else:
                 print(f"{statement_type}: No data")
     else:
-        print("\nSkipping live FMP API tests. Please provide a valid API key in config.ini.")
+        print("\nSkipping live FMP API tests. Set FMP_API_KEY in your .env file.")
 
     print("\nmarket_data_api.py tests complete.")

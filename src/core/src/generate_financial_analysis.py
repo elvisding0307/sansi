@@ -6,7 +6,6 @@ import os
 import pandas as pd
 import json 
 
-from modules.common_utils import load_config, get_api_key
 from modules.financial_data_processor import calculate_growth_and_forecasts, extract_historical_metrics_from_api_data
 from modules.market_data_api import (
     get_comprehensive_financial_data,
@@ -30,7 +29,6 @@ def main():
     parser.add_argument("--company-name", type=str, required=True, help="Full company name (e.g., Apple Inc.).")
     
     # API Configuration
-    parser.add_argument("--config-file", type=str, default=None, help="Path to the configuration file (e.g., config.ini).")
     parser.add_argument("--years-limit", type=int, default=5, help="Number of years of historical data to fetch.")
     
     # Output Configuration
@@ -83,52 +81,31 @@ def main():
         os.makedirs(text_output_dir, exist_ok=True)
         print(f"Text outputs will be saved to: {text_output_dir}")
 
-    # Load configuration and API keys
+    # Load API keys from environment variables
     openai_base_url = None
     openai_model = None
+    fmp_api_key = os.getenv("FMP_API_KEY")
     adanos_api_key = os.getenv("ADANOS_API_KEY")
     adanos_base_url = os.getenv("ADANOS_BASE_URL", "https://api.adanos.org")
-    try:
-        config = load_config(args.config_file)
-        fmp_api_key = get_api_key(config, section="API_KEYS", key="fmp_api_key")
-        adanos_api_key = config.get("API_KEYS", "adanos_api_key", fallback=adanos_api_key)
-        adanos_base_url = config.get("API_KEYS", "adanos_base_url", fallback=adanos_base_url)
-        if args.generate_text_sections:
-            # Support both deepseek_api_key and openai_api_key (backward compatibility)
-            openai_api_key = config.get("API_KEYS", "deepseek_api_key", fallback=None)
-            if not openai_api_key:
-                openai_api_key = get_api_key(config, section="API_KEYS", key="openai_api_key")
-            # Try to get base_url (deepseek first, then openai)
-            openai_base_url = config.get("API_KEYS", "deepseek_base_url", fallback=None)
-            if not openai_base_url:
-                try:
-                    openai_base_url = get_api_key(config, section="API_KEYS", key="openai_base_url")
-                except:
-                    pass
-            print(f"Using API base URL: {openai_base_url}")
-            # Try to get model name
-            openai_model = config.get("API_KEYS", "deepseek_model", fallback=None)
-            if not openai_model:
-                try:
-                    openai_model = get_api_key(config, section="API_KEYS", key="openai_model")
-                except:
-                    openai_model = None
-            print(f"Using model: {openai_model}")
-            # Set env vars for openai-agents SDK (it reads OPENAI_API_KEY and OPENAI_BASE_URL internally)
-            os.environ['OPENAI_API_KEY'] = openai_api_key
-            if openai_base_url:
-                os.environ['OPENAI_BASE_URL'] = openai_base_url
-            if openai_model:
-                os.environ['OPENAI_MODEL_NAME'] = openai_model
-    except Exception as e:
-        print(f"Error loading configuration: {e}")
-        print("Please ensure config.ini exists with valid API keys:")
-        print("[API_KEYS]")
-        print("fmp_api_key = YOUR_FMP_API_KEY")
-        print("deepseek_api_key = YOUR_DEEPSEEK_API_KEY")
-        print("deepseek_base_url = https://api.deepseek.com/v1")
-        print("deepseek_model = deepseek-chat")
+
+    if not fmp_api_key:
+        print("Error: FMP_API_KEY environment variable is not set.")
+        print("Copy .env.example to .env and fill in your API keys.")
         return
+
+    if args.generate_text_sections:
+        openai_api_key = os.getenv("DEEPSEEK_API_KEY")
+        if not openai_api_key:
+            print("Error: DEEPSEEK_API_KEY environment variable is not set.")
+            print("Copy .env.example to .env and fill in your API keys.")
+            return
+        openai_base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+        openai_model = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+        print(f"Using API base URL: {openai_base_url}")
+        print(f"Using model: {openai_model}")
+        os.environ['OPENAI_API_KEY'] = openai_api_key
+        os.environ['OPENAI_BASE_URL'] = openai_base_url
+        os.environ['OPENAI_MODEL_NAME'] = openai_model
 
     print(f"Starting FMP API-based financial analysis for {args.company_name} ({args.company_ticker})")
 

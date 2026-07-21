@@ -28,10 +28,10 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="${SCRIPT_DIR}/venv"
 PID_FILE="${SCRIPT_DIR}/.app.pid"
-LOG_DIR="${SCRIPT_DIR}/sansi/logs"
+LOG_DIR="${SCRIPT_DIR}/src/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/app.log"
-REQUIREMENTS_EQUITY="${SCRIPT_DIR}/requirements-equity.txt"
+REQUIREMENTS_FILE="${SCRIPT_DIR}/requirements.txt"
 
 # Web app configuration
 WEB_HOST="${WEB_HOST:-127.0.0.1}"
@@ -176,12 +176,12 @@ install_deps() {
     pip install --upgrade pip setuptools wheel 2>&1 | tail -5
     
     # Install equity research dependencies
-    if [ -f "$REQUIREMENTS_EQUITY" ]; then
-        print_info "Installing dependencies from $REQUIREMENTS_EQUITY..."
-        pip install -r "$REQUIREMENTS_EQUITY" 2>&1 | tail -5
+    if [ -f "$REQUIREMENTS_FILE" ]; then
+        print_info "Installing dependencies from $REQUIREMENTS_FILE..."
+        pip install -r "$REQUIREMENTS_FILE" 2>&1 | tail -5
     fi
     
-    # Note: sansi is a local module, no need to install separately
+    # Note: src is a local module, no need to install separately
     
     print_info "All dependencies installed successfully"
 }
@@ -238,7 +238,7 @@ start_app() {
     fi
     
     # Start the application
-    # Add current directory to PYTHONPATH so sansi can be imported
+    # Add current directory to PYTHONPATH so src can be imported
     export PYTHONPATH="$SCRIPT_DIR:$PYTHONPATH"
     
     nohup python "$SCRIPT_DIR/run_web_app.py" \
@@ -415,13 +415,11 @@ CONFIGURATION:
   API Keys:
     Before using equity analysis, configure your API keys:
     
-    cp sansi/core/config/config.ini.example \
-       sansi/core/config/config.ini
-    
-    Edit config.ini with your API keys:
-    [API_KEYS]
-    fmp_api_key = YOUR_FMP_API_KEY
-    openai_api_key = YOUR_OPENAI_API_KEY
+    cp .env.example .env
+
+    Edit .env with your API keys:
+    FMP_API_KEY=YOUR_FMP_API_KEY
+    DEEPSEEK_API_KEY=YOUR_DEEPSEEK_API_KEY
 
 ENVIRONMENT VARIABLES:
   WEB_HOST      Host address (default: 127.0.0.1)
@@ -429,8 +427,8 @@ ENVIRONMENT VARIABLES:
   WEB_RELOAD    Enable auto-reload (default: true)
 
 LOG FILES:
-  Application logs: sansi/logs/app.log
-  Task logs:        sansi/logs/task_{id}.log
+  Application logs: src/logs/app.log
+  Task logs:        src/logs/task_{id}.log
   Process ID file: .app.pid
 
 TROUBLESHOOTING:

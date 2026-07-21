@@ -25,9 +25,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CORE_ROOT = os.path.join(PROJECT_ROOT, "core")
 SRC_ROOT = CORE_ROOT  # SRC_ROOT points to core directory, scripts are in core/src
 OUTPUT_DIR = os.path.join(CORE_ROOT, "output")
-CONFIG_DIR = os.path.join(CORE_ROOT, "config")
 DATA_DIR = os.path.join(PROJECT_ROOT, "web_app", "data")
-LOGS_DIR = os.path.join(PROJECT_ROOT, "logs")  # 统一日志目录：sansi/logs/
+LOGS_DIR = os.path.join(PROJECT_ROOT, "logs")  # 统一日志目录：src/logs/
 
 # Ensure directories exist
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -305,8 +304,7 @@ def execute_analysis_pipeline(task_id: str, req: AnalysisRequest):
     
     python_exe = sys.executable
     src_dir = os.path.join(SRC_ROOT, "src")  # Now points to core/src
-    config_file = os.path.join(CONFIG_DIR, "config.ini")
-    
+
     # Create output directories
     analysis_output_dir = os.path.join(OUTPUT_DIR, req.ticker, "analysis")
     report_output_dir = os.path.join(OUTPUT_DIR, req.ticker, "report")
@@ -345,7 +343,6 @@ def execute_analysis_pipeline(task_id: str, req: AnalysisRequest):
     if req.report_language:
         cmd_analysis.extend(["--report-language", req.report_language])
 
-    cmd_analysis.extend(["--config-file", config_file])
 
     if not run_process(cmd_analysis, task_id, cwd=SRC_ROOT):
         # Update report status to failed
@@ -375,7 +372,6 @@ def execute_analysis_pipeline(task_id: str, req: AnalysisRequest):
         "--competitor-analysis-file", os.path.join(base_output_dir, "competitor_analysis.txt"),
         "--major-takeaways-file", os.path.join(base_output_dir, "major_takeaways.txt"),
         "--output-dir", report_output_dir,
-        "--config-file", config_file,
         "--enable-text-regeneration"
     ]
     
@@ -426,8 +422,7 @@ def execute_analysis_pipeline(task_id: str, req: AnalysisRequest):
             "--company-ticker", req.ticker,
             "--company-name", req.company_name,
             "--analysis-dir", base_output_dir,
-            "--output-dir", report_output_dir,
-            "--config-file", config_file
+            "--output-dir", report_output_dir
         ]
         
         if not run_process(cmd_pdf, task_id, cwd=SRC_ROOT):

@@ -4,7 +4,7 @@ __pycache__/
 *.csv
 *.jpg
 *.png
-!sansi/web_app/static/*.png
+!src/web_app/static/*.png
 quant/
 coding/
 *.egg-info/
@@ -28,12 +28,12 @@ filings/
 # Environment & secrets
 .env
 .env.*
-config.ini
 venv/
 .venv/
 
 # Runtime files
 .app.pid
-sansi/logs/
-sansi/web_app/data/*.db
-sansi/core/output/
+src/logs/
+src/web_app/data/*.db
+src/core/output/
+src/core/config/

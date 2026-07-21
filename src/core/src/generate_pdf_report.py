@@ -23,7 +23,6 @@ import pandas as pd
 # 添加模块路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from modules.common_utils import load_config, get_api_key
 from modules.report_data_loader import load_analysis_csv, load_text_from_file
 from modules.chart_generator import (
     generate_revenue_ebitda_chart, 
@@ -381,23 +380,19 @@ def generate_all_charts(analysis_df: pd.DataFrame, peer_ev_ebitda_df: pd.DataFra
     return charts
 
 
-def fetch_market_data(ticker: str, config_file: Optional[str] = None) -> Dict[str, Any]:
-    """
-    从API获取市场数据
-    """
+def fetch_market_data(ticker: str) -> Dict[str, Any]:
+    """Fetch market data from API using environment variables."""
     market_data = {}
-    
-    try:
-        config = load_config(config_file)
-        fmp_api_key = get_api_key(config, "API_KEYS", "fmp_api_key")
-        
-        if fmp_api_key:
-            print(f"📊 Fetching market data for {ticker}...")
+
+    fmp_api_key = os.getenv("FMP_API_KEY")
+    if fmp_api_key:
+        print(f"📊 Fetching market data for {ticker}...")
+        try:
             market_data = get_comprehensive_company_metrics(ticker, fmp_api_key)
             print(f"✅ Successfully fetched market data")
-    except Exception as e:
-        print(f"⚠️ Could not fetch market data: {e}")
-    
+        except Exception as e:
+            print(f"⚠️ Could not fetch market data: {e}")
+
     return market_data
 
 
@@ -419,12 +414,10 @@ def main():
     # 可选参数
     parser.add_argument("--output-dir", type=str, default=None,
                        help="Output directory for PDF report")
-    parser.add_argument("--report-date", type=str, 
+    parser.add_argument("--report-date", type=str,
                        default=datetime.now().strftime("%B %Y"),
                        help="Report date (e.g., 'November 2025')")
-    parser.add_argument("--config-file", type=str, default=None,
-                       help="Path to config.ini file")
-    
+
     # 市场数据覆盖
     parser.add_argument("--share-price", type=float, default=None)
     parser.add_argument("--target-price", type=float, default=None)
@@ -472,11 +465,10 @@ def main():
     market_data = {}
     tech_indicators = {}
     if not args.skip_market_fetch:
-        market_data = fetch_market_data(ticker, args.config_file)
+        market_data = fetch_market_data(ticker)
         # Fetch technical indicators
         try:
-            config = load_config(args.config_file)
-            fmp_key = get_api_key(config, "API_KEYS", "fmp_api_key")
+            fmp_key = os.getenv("FMP_API_KEY")
             if fmp_key:
                 tech_indicators = get_technical_indicators(ticker, fmp_key)
         except Exception as e:
