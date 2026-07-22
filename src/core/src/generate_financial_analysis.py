@@ -542,7 +542,7 @@ def main():
                 # Write a flag file so create_equity_report.py knows to render 10-module report
                 flag_path = os.path.join(output_dir, ".has_agent_outputs")
                 with open(flag_path, "w") as f:
-                    f.write(agent_output_dir)
+                    f.write(f"{agent_output_dir}\n{args.report_language}")
                 print("10-module agent report ready for rendering.")
 
             except Exception as e:

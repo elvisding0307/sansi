@@ -1012,7 +1012,9 @@ def main():
             from modules.html_template_10module import render_10module_html
             import json as _json
 
-            agent_output_dir = open(agent_flag_path).read().strip()
+            agent_flag_content = open(agent_flag_path).read().strip().split("\n")
+            agent_output_dir = agent_flag_content[0]
+            report_lang = agent_flag_content[1] if len(agent_flag_content) > 1 else "en"
             agent_outputs = {}
             module_names = [
                 "investment_thesis", "investment_rationale", "industry_analysis",
@@ -1040,7 +1042,7 @@ def main():
             }
 
             report_10m_path = os.path.join(output_dir, f"Initiating_Coverage_{args.company_ticker}.html")
-            html_10m = render_10module_html(agent_outputs, report_meta)
+            html_10m = render_10module_html(agent_outputs, report_meta, language=report_lang)
             with open(report_10m_path, "w", encoding="utf-8") as f:
                 f.write(html_10m)
             print(f"✅ Generated 10-Module Report: {report_10m_path}")
