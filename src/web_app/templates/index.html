@@ -676,10 +676,12 @@
                         const professionalPdf = allPdfs.filter(r => r.includes('Professional_Equity_Report') || r.includes('Professional'));
                         const sortedPdfs = professionalPdf.length > 0 ? [...professionalPdf, ...allPdfs.filter(r => !r.includes('Professional'))] : allPdfs;
                         const allHtmls = data.reports.filter(r => r.endsWith('.html'));
+                        // 10-module Initiating Coverage report first (new format)
+                        const initiatingHtml = allHtmls.filter(r => r.includes('Initiating_Coverage'));
                         const professionalHtml = allHtmls.filter(r => r.includes('Professional_Equity_Report'));
                         const combinedHtml = allHtmls.filter(r => r.includes('Combined_Equity_Report'));
-                        const otherHtmls = allHtmls.filter(r => !r.includes('Professional_Equity_Report') && !r.includes('Combined_Equity_Report') && !r.includes('Page'));
-                        const sortedHtmls = [...professionalHtml, ...combinedHtml, ...otherHtmls];
+                        const otherHtmls = allHtmls.filter(r => !r.includes('Initiating_Coverage') && !r.includes('Professional_Equity_Report') && !r.includes('Combined_Equity_Report') && !r.includes('Page'));
+                        const sortedHtmls = [...initiatingHtml, ...professionalHtml, ...combinedHtml, ...otherHtmls];
                         task.result = { html: sortedHtmls.length > 0 ? sortedHtmls : allHtmls, pdf: sortedPdfs };
                     } catch (e) { console.error("Error fetching reports", e); }
                 },
