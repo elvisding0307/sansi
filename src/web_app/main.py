@@ -260,7 +260,7 @@ class AnalysisRequest(BaseModel):
     enable_enhanced_news: bool = True
     enable_enhanced_charts: bool = True
     enable_valuation_analysis: bool = True
-    report_language: str = "en"  # "en" or "zh"
+    report_language: str = "zh"  # "en" or "zh"
 
 def run_process(command, task_id, cwd=None):
     """Run a shell command and capture output to the task logs."""
