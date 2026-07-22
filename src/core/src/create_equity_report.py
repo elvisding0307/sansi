@@ -995,12 +995,59 @@ def main():
         report_data['revenue_key_figures'] = revenue_figures
         report_data['eps_key_figures'] = eps_figures
     
-    # Generate professional HTML report
+    # Generate professional HTML report (legacy format)
     professional_html_path = os.path.join(output_dir, f"Professional_Equity_Report_{args.company_ticker}.html")
     professional_html_content = render_professional_html_report(report_data)
     with open(professional_html_path, "w", encoding="utf-8") as f:
         f.write(professional_html_content)
     print(f"✅ Generated Professional HTML Report: {professional_html_path}")
+
+    # --- NEW: Generate 10-Module Initiating Coverage Report from Agent outputs ---
+    agent_flag_path = os.path.join(os.path.dirname(args.analysis_csv), ".has_agent_outputs")
+    if os.path.exists(agent_flag_path):
+        print("\n" + "="*60)
+        print("Generating 10-Module Initiating Coverage Report from Agent outputs...")
+        print("="*60)
+        try:
+            from modules.html_template_10module import render_10module_html
+            import json as _json
+
+            agent_output_dir = open(agent_flag_path).read().strip()
+            agent_outputs = {}
+            module_names = [
+                "investment_thesis", "investment_rationale", "industry_analysis",
+                "company_analysis", "financial_analysis", "earnings_forecast",
+                "valuation_analysis", "technical_analysis", "monitor_signals",
+                "risk_disclosure", "editor",
+            ]
+            for name in module_names:
+                jpath = os.path.join(agent_output_dir, f"{name}.json")
+                if os.path.exists(jpath):
+                    with open(jpath) as f:
+                        agent_outputs[name] = _json.load(f)
+
+            report_meta = {
+                "company_name": args.company_name,
+                "company_ticker": args.company_ticker,
+                "sector": report_data.get("sector", "Technology"),
+                "share_price": report_data.get("share_price", "N/A"),
+                "target_price": report_data.get("target_price", "N/A"),
+                "market_cap": report_data.get("market_cap", "N/A"),
+                "report_date": args.report_date,
+                "research_source": args.research_source,
+                "disclaimer_text": args.disclaimer_text,
+                "data_source_text": args.data_source_text,
+            }
+
+            report_10m_path = os.path.join(output_dir, f"Initiating_Coverage_{args.company_ticker}.html")
+            html_10m = render_10module_html(agent_outputs, report_meta)
+            with open(report_10m_path, "w", encoding="utf-8") as f:
+                f.write(html_10m)
+            print(f"✅ Generated 10-Module Report: {report_10m_path}")
+        except Exception as e:
+            print(f"⚠️ 10-Module report generation skipped (error): {e}")
+            import traceback
+            traceback.print_exc()
 
     # --- Generate Combined HTML Report (all sections in one file) ---
     print("Generating combined HTML report (all sections in one file)...")

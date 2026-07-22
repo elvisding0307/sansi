@@ -469,6 +469,87 @@ def main():
                     with open(file_path, "w", encoding="utf-8") as f:
                         f.write(fallback_text)
                     print(f"Created fallback text for '{text_type}' at {file_path}")
+
+            # 5.5 NEW: Run 10+1 Agent System for structured 10-module report
+            print("\n" + "="*60)
+            print("Running 10+1 Agent System for full Initiating Coverage report...")
+            print("="*60)
+            try:
+                from modules.equity_agents import ModuleData, create_manager
+
+                # Build company profile dict from available data
+                company_profile = {
+                    "companyName": args.company_name,
+                    "sector": "Technology",
+                    "industry": "Consumer Electronics",
+                    "fullTimeEmployees": None,
+                    "ceo": None,
+                    "description": None,
+                    "revenue": None,
+                }
+                if financial_data and 'income_statement' in financial_data:
+                    df = financial_data['income_statement']
+                    if not df.empty:
+                        latest = df.sort_values('date', ascending=False).iloc[0]
+                        company_profile['revenue'] = latest.get('revenue')
+
+                # Build ModuleData from existing analysis results
+                fin_metrics_dict = {c: final_data_df[c].tolist() for c in final_data_df.columns}
+                fin_metrics_dict['metrics'] = final_data_df['metrics'].tolist()
+
+                # Extract valuation results if available
+                valuation_results = None
+
+                # Build technical indicators from compute if available
+                tech_indicators = {}
+
+                module_data = ModuleData(
+                    company_name=args.company_name,
+                    company_ticker=args.company_ticker,
+                    sector=company_profile.get('sector', 'Technology'),
+                    industry=company_profile.get('industry', ''),
+                    current_price=0.0,
+                    market_cap=0.0,
+                    financial_metrics=fin_metrics_dict,
+                    forecast_data={
+                        "revenue_growth": {k: v for k, v in zip(
+                            ["2025E", "2026E", "2027E"],
+                            [args.revenue_growth_2025, args.revenue_growth_2026, args.revenue_growth_2027]
+                        )},
+                    },
+                    company_profile=company_profile,
+                    technical_indicators=tech_indicators,
+                    peer_metrics=peer_metrics_dict if 'peer_metrics_dict' in dir() else None,
+                    catalyst_data=catalyst_results,
+                    risk_data=None,
+                    news_data=company_news,
+                    language=args.report_language,
+                )
+
+                # Run the full pipeline
+                manager = create_manager(model=openai_model)
+                agent_results = manager.generate_all_sync(module_data)
+
+                # Save JSON outputs
+                agent_output_dir = os.path.join(output_dir, "agent_outputs")
+                os.makedirs(agent_output_dir, exist_ok=True)
+                for mod_name, result in agent_results.items():
+                    json_path = os.path.join(agent_output_dir, f"{mod_name}.json")
+                    with open(json_path, "w", encoding="utf-8") as f:
+                        json.dump(result, f, indent=2, ensure_ascii=False, default=str)
+                print(f"Agent outputs saved to: {agent_output_dir}/ ({len(agent_results)} files)")
+
+                # Write a flag file so create_equity_report.py knows to render 10-module report
+                flag_path = os.path.join(output_dir, ".has_agent_outputs")
+                with open(flag_path, "w") as f:
+                    f.write(agent_output_dir)
+                print("10-module agent report ready for rendering.")
+
+            except Exception as e:
+                print(f"Agent system skipped (error): {e}")
+                import traceback
+                traceback.print_exc()
+
     else:
         print("Skipping text generation (not enabled)")
 
