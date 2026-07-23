@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent
+from ._legacy_compat import LangChainAgent
 
 COMPANY_OVERVIEW_PROMPT = (
     "[ROLE]\n\n"
@@ -46,7 +46,7 @@ COMPANY_OVERVIEW_PROMPT = (
 class CompanyOverviewResponse(BaseModel):
     overview: str
 
-company_overview_agent = Agent(
+company_overview_agent = LangChainAgent(
     name="CompanyOverviewAgent",
     instructions=COMPANY_OVERVIEW_PROMPT,
     output_type=CompanyOverviewResponse,

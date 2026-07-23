@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent
+from ._legacy_compat import LangChainAgent
 
 VALUATION_OVERVIEW_PROMPT = (
     "[ROLE] You are a professional analyst with 5 years of research experience, specializing in corporate valuation analysis. You excel at interpreting the market logic and potential risks behind valuation levels through multi-dimensional comparisons and reasonableness assessments."
@@ -33,7 +33,7 @@ VALUATION_OVERVIEW_PROMPT = (
 class ValuationOverviewResponse(BaseModel):
     valuation_analysis: str
 
-valuation_overview_agent = Agent(
+valuation_overview_agent = LangChainAgent(
     name="ValuationOverviewAgent",
     instructions=VALUATION_OVERVIEW_PROMPT, 
     output_type=ValuationOverviewResponse,

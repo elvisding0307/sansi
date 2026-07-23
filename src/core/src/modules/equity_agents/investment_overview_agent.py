@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent
+from ._legacy_compat import LangChainAgent
 
 INVESTMENT_OVERVIEW_PROMPT = (
     "[ROLE]\n\n"
@@ -42,7 +42,7 @@ INVESTMENT_OVERVIEW_PROMPT = (
 class InvestmentOverviewResponse(BaseModel):
     investment_update: str
 
-investment_overview_agent = Agent(
+investment_overview_agent = LangChainAgent(
     name="InvestmentOverviewAgent", 
     instructions=INVESTMENT_OVERVIEW_PROMPT,
     output_type=InvestmentOverviewResponse,

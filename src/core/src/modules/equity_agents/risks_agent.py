@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent
+from ._legacy_compat import LangChainAgent
 '''
 RISKS_PROMPT = (
     "You are a risk analyst specializing in equity research. "
@@ -51,7 +51,7 @@ RISKS_PROMPT = (
 class RisksResponse(BaseModel):
     risk_analysis: str
 
-risks_agent = Agent(
+risks_agent = LangChainAgent(
     name="RiskAnalystAgent",
     instructions=RISKS_PROMPT,
     output_type=RisksResponse,

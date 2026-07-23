@@ -1,9 +1,8 @@
 """
-Agent infrastructure: ModuleData, agent runner, and prompt helpers.
+Agent infrastructure: ModuleData, LangChain structured LLM factory, and prompt helpers.
 
-Uses the raw openai SDK (Chat Completions API) for DeepSeek compatibility.
-The openai-agents SDK is NOT used because it requires OpenAI's /v1/responses endpoint
-which DeepSeek does not support.
+Uses langchain-openai (ChatOpenAI) for DeepSeek compatibility.
+JSON structured output is enforced via with_structured_output(method="json_mode").
 """
 
 from dataclasses import dataclass, field
@@ -11,7 +10,7 @@ from typing import Optional, Dict, List, Any
 import os
 import json
 import logging
-from openai import OpenAI
+from langchain_openai import ChatOpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -346,52 +345,33 @@ class ModuleData:
 
 
 # ---------------------------------------------------------------------------
-# Agent runner (replaces openai-agents SDK calls — uses raw Chat Completions)
+# LangChain structured LLM factory (replaces raw openai SDK agent runner)
 # ---------------------------------------------------------------------------
 
-_STRUCTURED_OUTPUT_SYSTEM_PROMPT = """
-You must respond with valid JSON only. No markdown, no code fences, no additional text.
-Your entire response must parse as a single JSON object matching the specified schema.
 
-IMPORTANT RULES:
-1. Output ONLY the JSON object — no preamble, no comments, no ```json fences
-2. Every field in the schema must be present in your output
-3. String values must be properly escaped (use \\\" for quotes inside strings)
-4. Numbers must NOT be quoted (unless the schema says they should be strings)
-5. Arrays must use [] syntax, objects must use {} syntax
-6. Do not include trailing commas
-""".strip()
-
-
-def run_agent(
-    instructions: str,
-    output_schema: dict,
-    user_prompt: str,
+def create_llm(
     model: str = None,
     api_key: str = None,
     base_url: str = None,
     temperature: float = 0.25,
     max_tokens: int = 4000,
-) -> dict:
+) -> ChatOpenAI:
     """
-    Run an agent using the OpenAI-compatible Chat Completions API (DeepSeek compatible).
+    Create a LangChain ChatOpenAI instance for DeepSeek.
 
-    Uses JSON mode + structured output prompting to get Pydantic-compatible JSON.
-    Also uses tool calling (function_call) with strict JSON schema for models that
-    support it (gpt-4o, deepseek-chat via json_object mode).
+    Uses ``model_kwargs={"response_format": {"type": "json_object"}}`` so the
+    caller must include the word "json" in the prompt (DeepSeek requirement).
+    JSON parsing from the response is handled by the caller (see graph.py).
 
     Args:
-        instructions: The agent's system instructions
-        output_schema: JSON schema dict describing the expected output
-        user_prompt: The data-rich user prompt
-        model: Model name
-        api_key: API key
-        base_url: API base URL
-        temperature: Generation temperature
-        max_tokens: Max output tokens
+        model: Model name (defaults to DEEPSEEK_MODEL env var or "deepseek-chat").
+        api_key: API key (defaults to DEEPSEEK_API_KEY env var).
+        base_url: API base URL (defaults to DEEPSEEK_BASE_URL env var).
+        temperature: Generation temperature.
+        max_tokens: Max output tokens.
 
     Returns:
-        Parsed JSON dict matching the output schema
+        A ChatOpenAI instance configured for JSON mode.
     """
     model = model or os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
     api_key = api_key or os.getenv("DEEPSEEK_API_KEY")
@@ -400,95 +380,19 @@ def run_agent(
     if not api_key:
         raise ValueError("No API key available. Set DEEPSEEK_API_KEY.")
 
-    client = OpenAI(api_key=api_key, base_url=base_url)
-
-    # Build system message: instructions + output schema + JSON enforcement
-    schema_str = json.dumps(output_schema, indent=2)
-    system_content = (
-        f"{instructions}\n\n"
-        f"{_STRUCTURED_OUTPUT_SYSTEM_PROMPT}\n\n"
-        f"## REQUIRED JSON SCHEMA\n"
-        f"Your output must conform to this JSON structure exactly:\n"
-        f"```json\n{schema_str}\n```"
-    )
-
-    messages = [
-        {"role": "system", "content": system_content},
-        {"role": "user", "content": user_prompt},
-    ]
-
-    logger.info(f"Calling {model} with {len(user_prompt)}-char prompt...")
-
-    response = client.chat.completions.create(
+    return ChatOpenAI(
         model=model,
-        messages=messages,
+        api_key=api_key,
+        base_url=base_url,
         temperature=temperature,
         max_tokens=max_tokens,
-        response_format={"type": "json_object"},  # DeepSeek supports this
+        model_kwargs={"response_format": {"type": "json_object"}},
     )
 
-    content = response.choices[0].message.content.strip()
 
-    # Clean up common LLM artifacts
-    content = _clean_json_response(content)
-
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parse failed: {e}")
-        logger.error(f"Raw content (first 500 chars): {content[:500]}")
-        # Retry once with simpler prompt
-        return _retry_json_parse(client, model, instructions, user_prompt, output_schema,
-                                 temperature, max_tokens)
-
-
-def _clean_json_response(content: str) -> str:
-    """Strip markdown fences and other common LLM artifacts from JSON output."""
-    content = content.strip()
-    # Remove ```json ... ``` fences
-    if content.startswith("```"):
-        lines = content.split("\n")
-        # Remove first line if it's ``` or ```json
-        if lines[0].startswith("```"):
-            lines = lines[1:]
-        # Remove last line if it's ```
-        if lines and lines[-1].startswith("```"):
-            lines = lines[:-1]
-        content = "\n".join(lines)
-    return content.strip()
-
-
-def _retry_json_parse(client, model, instructions, user_prompt, schema, temperature, max_tokens) -> dict:
-    """Retry with an explicit reminder to output pure JSON."""
-    retry_system = (
-        f"{instructions}\n\n"
-        f"CRITICAL: Your last response was not valid JSON. "
-        f"You MUST output ONLY a valid JSON object. Start your response with {{ and end with }}. "
-        f"No markdown fences. No explanatory text. Only the JSON object.\n\n"
-        f"Required schema:\n{json.dumps(schema, indent=2)}"
-    )
-    messages = [
-        {"role": "system", "content": retry_system},
-        {"role": "user", "content": user_prompt},
-        # Nudge with a pre-filled assistant start
-        {"role": "assistant", "content": "{"},
-    ]
-
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=0.1,  # even lower on retry
-        max_tokens=max_tokens,
-    )
-
-    content = "{" + response.choices[0].message.content.strip()
-    content = _clean_json_response(content)
-
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        logger.error(f"Retry also failed. Returning partial/error result.")
-        return {"error": "Failed to parse agent output as JSON", "raw": content[:500]}
+def schema_from_pydantic(model_class: type) -> dict:
+    """Extract JSON schema from a Pydantic BaseModel class."""
+    return model_class.model_json_schema()
 
 
 def schema_from_pydantic(model_class: type) -> dict:

@@ -1,7 +1,9 @@
 """
 Agent Manager — orchestrates 10 module agents + editor in 3 phases.
 
-Uses raw openai SDK (Chat Completions, not Responses API) for DeepSeek compatibility.
+Uses LangGraph (langgraph) for the 3-phase pipeline and langchain-openai
+(ChatOpenAI) for LLM calls.  The public API (create_manager, generate_all_sync,
+generate_module_sync) is unchanged for backward compatibility.
 
 Phase 1 (parallel): Modules 3, 4, 5, 6, 7, 8 — independent analysis
 Phase 2 (dependent): Modules 2, 10, 9 — need Phase 1 outputs
@@ -12,10 +14,9 @@ import asyncio
 import os
 import json
 import logging
-from typing import Dict, List, Optional, Callable
-from concurrent.futures import ThreadPoolExecutor
+from typing import Dict, List, Optional
 
-from .base import ModuleData, run_agent, schema_from_pydantic
+from .base import ModuleData, schema_from_pydantic
 
 logger = logging.getLogger(__name__)
 
@@ -87,45 +88,50 @@ PHASE_3_MODULES = [
 # ---------------------------------------------------------------------------
 
 class EquityResearchAgentManager:
-    """Orchestrates all agents in 3 phases."""
+    """Orchestrates all agents in 3 phases using LangGraph."""
 
     def __init__(self, model: str = None):
         self.model = model or os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
         self.base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
         self.api_key = os.getenv("DEEPSEEK_API_KEY")
-        self._executor = ThreadPoolExecutor(max_workers=6)
+        self._graph = None  # lazily built & compiled
+
+    def _get_graph(self):
+        """Lazy-build and compile the LangGraph app."""
+        if self._graph is None:
+            from .graph import build_agent_graph
+
+            self._graph = build_agent_graph(
+                self.model, self.api_key, self.base_url
+            ).compile()
+        return self._graph
 
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
 
     async def generate_all(self, data: ModuleData) -> Dict[str, dict]:
-        """Run the full 3-phase pipeline."""
-        results: Dict[str, dict] = {}
+        """Run the full 3-phase pipeline via LangGraph."""
+        app = self._get_graph()
 
-        # Phase 1 — 6 independent modules in parallel
-        logger.info("=== Phase 1: 6 parallel modules ===")
-        p1 = await self._run_phase(PHASE_1_MODULES, data)
-        results.update(p1)
-        data.module_results = results
+        initial_state = {
+            "module_data": data,
+            "results": {},
+        }
 
-        # Phase 2 — 3 dependent modules
-        logger.info("=== Phase 2: 3 dependent modules ===")
-        p2 = await self._run_phase(PHASE_2_MODULES, data)
-        results.update(p2)
-        data.module_results = results
+        logger.info("Running LangGraph agent pipeline...")
+        final_state = await app.ainvoke(initial_state)
+        logger.info(f"LangGraph pipeline complete: {len(final_state['results'])} modules")
 
-        # Phase 3 — 2 synthesis modules
-        logger.info("=== Phase 3: 2 synthesis modules ===")
-        p3 = await self._run_phase(PHASE_3_MODULES, data)
-        results.update(p3)
-
-        logger.info(f"=== Complete: {len(results)} modules ===")
-        return results
+        return final_state["results"]
 
     async def generate_module(self, module_name: str, data: ModuleData) -> dict:
-        """Run a single module agent."""
-        return await self._run_single(module_name, data)
+        """Run a single module agent via LangChain."""
+        from .graph import run_single_agent
+
+        return await run_single_agent(
+            module_name, data, self.model, self.api_key, self.base_url
+        )
 
     def generate_all_sync(self, data: ModuleData) -> Dict[str, dict]:
         """Synchronous wrapper."""
@@ -177,53 +183,6 @@ class EquityResearchAgentManager:
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
-
-    async def _run_single(self, module_name: str, data: ModuleData) -> dict:
-        """Execute one agent and return its parsed output dict."""
-        reg = _AGENT_REGISTRY.get(module_name)
-        if not reg:
-            return {"error": f"Unknown module: {module_name}"}
-
-        # Build the user prompt
-        prompt_method = getattr(data, reg["prompt_method"], None)
-        if not prompt_method:
-            return {"error": f"No prompt method for {module_name}"}
-        user_prompt = prompt_method()
-
-        # Run synchronously in thread pool (openai SDK is blocking)
-        loop = asyncio.get_event_loop()
-        try:
-            result = await loop.run_in_executor(
-                self._executor,
-                lambda: run_agent(
-                    instructions=reg["instructions"],
-                    output_schema=reg["schema"],
-                    user_prompt=user_prompt,
-                    model=self.model,
-                    api_key=self.api_key,
-                    base_url=self.base_url,
-                    temperature=0.25,
-                    max_tokens=4000,
-                ),
-            )
-            return result
-        except Exception as e:
-            logger.error(f"Agent '{module_name}' failed: {e}")
-            return {"error": str(e), "module": module_name}
-
-    async def _run_phase(self, modules: List[str], data: ModuleData) -> Dict[str, dict]:
-        """Run a list of modules in parallel."""
-        tasks = [self._run_single(m, data) for m in modules]
-        gathered = await asyncio.gather(*tasks, return_exceptions=True)
-
-        results = {}
-        for name, result in zip(modules, gathered):
-            if isinstance(result, Exception):
-                logger.error(f"Module '{name}' raised: {result}")
-                results[name] = {"error": str(result)}
-            else:
-                results[name] = result
-        return results
 
     def _prepare_legacy_prompt(self, data: dict, company_name: str, company_ticker: str) -> str:
         """Build prompt for legacy simple agents."""

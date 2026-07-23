@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent
+from ._legacy_compat import LangChainAgent
 
 COMPETITOR_ANALYSIS_PROMPT = (
     "[ROLE]\n\n"
@@ -32,7 +32,7 @@ COMPETITOR_ANALYSIS_PROMPT = (
 class CompetitorAnalysisResponse(BaseModel):
     competitive_analysis: str
 
-competitor_analysis_agent = Agent(
+competitor_analysis_agent = LangChainAgent(
     name="CompetitorAnalysisAgent",
     instructions=COMPETITOR_ANALYSIS_PROMPT,
     output_type=CompetitorAnalysisResponse,

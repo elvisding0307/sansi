@@ -1,7 +1,7 @@
 """Equity Research Agents — 10+1 agent system for Initiating Coverage reports."""
 
 # Infrastructure
-from .base import ModuleData, run_agent, schema_from_pydantic
+from .base import ModuleData, create_llm, schema_from_pydantic
 from .agent_manager import EquityResearchAgentManager, create_manager
 
 # Output types (for type checking / reference)
@@ -43,7 +43,7 @@ from .news_summary_agent import news_summary_agent, NewsSummaryResponse
 __all__ = [
     # Infrastructure
     "ModuleData",
-    "run_agent",
+    "create_llm",
     "schema_from_pydantic",
     "EquityResearchAgentManager",
     "create_manager",

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent  # This now imports from openai-agents package
+from ._legacy_compat import LangChainAgent
 
 TAGLINE_PROMPT = (
     "You are an equity research analyst specializing in creating compelling executive taglines. "
@@ -12,7 +12,7 @@ TAGLINE_PROMPT = (
 class TaglineResponse(BaseModel):
     tagline: str
 
-tagline_agent = Agent(
+tagline_agent = LangChainAgent(
     name="TaglineAnalystAgent",
     instructions=TAGLINE_PROMPT,
     output_type=TaglineResponse,

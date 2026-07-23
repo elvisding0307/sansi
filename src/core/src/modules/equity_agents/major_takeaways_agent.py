@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent
+from ._legacy_compat import LangChainAgent
 
 MAJOR_TAKEAWAYS_PROMPT = (
     "You are a senior equity research analyst creating executive takeaways for institutional investors. "
@@ -24,7 +24,7 @@ class MajorTakeawaysResponse(BaseModel):
     takeaways: str
     """Strategic major takeaways with investment insights and business context."""
 
-major_takeaways_agent = Agent(
+major_takeaways_agent = LangChainAgent(
     name="MajorTakeawaysAgent", 
     instructions=MAJOR_TAKEAWAYS_PROMPT,
     output_type=MajorTakeawaysResponse,

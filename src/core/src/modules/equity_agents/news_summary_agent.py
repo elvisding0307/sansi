@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from agents import Agent
+from ._legacy_compat import LangChainAgent
 
 NEWS_SUMMARY_PROMPT = (
     "[ROLE]\n\n"
@@ -53,7 +53,7 @@ NEWS_SUMMARY_PROMPT = (
 class NewsSummaryResponse(BaseModel):
     news_summary: str
 
-news_summary_agent = Agent(
+news_summary_agent = LangChainAgent(
     name="NewsSummaryAgent",
     instructions=NEWS_SUMMARY_PROMPT,
     output_type=NewsSummaryResponse,
